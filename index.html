@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kadriform Content Bot</title>
+<style>
+  :root {
+    --bg: #faf7f2;
+    --panel: #ffffff;
+    --border: #e3ddd0;
+    --text: #2b2620;
+    --muted: #6f6656;
+    --accent: #4a6b4f;
+    --accent-soft: #e7efe6;
+    --danger: #a64b3e;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1a16;
+      --panel: #26231d;
+      --border: #3a352c;
+      --text: #f1ece2;
+      --muted: #b3a996;
+      --accent: #8bb391;
+      --accent-soft: #2c3a2d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1a16;
+    --panel: #26231d;
+    --border: #3a352c;
+    --text: #f1ece2;
+    --muted: #b3a996;
+    --accent: #8bb391;
+    --accent-soft: #2c3a2d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Top bar */
+  #topbar {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  #topbar .brand { font-weight: 600; font-size: 14px; }
+  #topbar .brand span { font-weight: 400; color: var(--muted); }
+  .key-row { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 260px; }
+  .key-row input {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 13px;
+    min-width: 160px;
+  }
+  .key-row button, #topbar .icon-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  #keyStatus { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  #topbar .actions { display: flex; gap: 8px; }
+
+  /* Chat log */
+  #log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .msg {
+    max-width: 78%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .user {
+    align-self: flex-end;
+    background: var(--accent);
+    color: white;
+    border-radius: 16px 16px 4px 16px;
+  }
+  .assistant {
+    align-self: flex-start;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px 16px 16px 4px;
+  }
+  .system-note {
+    align-self: center;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+  }
+  .status {
+    align-self: flex-start;
+    color: var(--muted);
+    font-size: 18px;
+    letter-spacing: 3px;
+  }
+
+  /* Input bar */
+  #inputBar {
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  #inputBar textarea {
+    flex: 1;
+    resize: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    max-height: 120px;
+    overflow-y: auto;
+  }
+  #inputBar button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  #inputBar button:disabled { background: var(--border); cursor: not-allowed; }
+
+  /* Settings modal */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+    z-index: 20;
+  }
+  .modal[hidden] { display: none; }
+  .modal-content {
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 22px;
+    max-width: 640px;
+    width: 100%;
+  }
+  .modal-content h2 { font-size: 16px; margin: 18px 0 8px; }
+  .modal-content h2:first-child { margin-top: 0; }
+  .modal-content .hint { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
+  .modal-content textarea, .modal-content input[type="text"], .modal-content select {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .modal-content textarea { min-height: 60px; resize: vertical; }
+  #systemPromptInput, #examplesInput { min-height: 180px; }
+  .qrow, .prow {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+  .qrow-top, .prow-top { display: flex; gap: 8px; margin-bottom: 6px; }
+  .qrow-top input, .prow-top input { flex: 1; }
+  .icon-btn-sm {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .field-label { font-size: 11px; color: var(--muted); margin: 6px 0 3px; display: block; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .modal-actions button { padding: 9px 16px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; font-size: 13px; }
+  .modal-actions button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+  <div id="topbar">
+    <div class="brand">Kadriform <span>assistant de contenu</span></div>
+    <div class="key-row">
+      <input id="apiKeyInput" type="password" placeholder="Clé API Claude (sk-ant-...)" autocomplete="off" />
+      <button id="toggleKeyBtn" title="Afficher / masquer">👁</button>
+      <button id="saveKeyBtn">Enregistrer</button>
+      <span id="keyStatus"></span>
+    </div>
+    <div class="actions">
+      <button class="icon-btn" id="settingsBtn" title="Paramètres">⚙️ Paramètres</button>
+      <button class="icon-btn" id="resetBtn">Nouveau contenu</button>
+    </div>
+  </div>
+
+  <div id="log"></div>
+
+  <div id="inputBar">
+    <textarea id="input" rows="1" placeholder="Écris ta réponse... (Maj+Entrée pour sauter une ligne)"></textarea>
+    <button id="sendBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13" />
+        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="modal" id="settingsModal" hidden>
+    <div class="modal-content">
+      <h2>Consignes de rédaction (system prompt)</h2>
+      <p class="hint">Ton de marque et règles générales. Ce texte s'applique à toutes les conversations.</p>
+      <textarea id="systemPromptInput"></textarea>
+
+      <h2>Exemples de publications</h2>
+      <p class="hint">Des publications réelles de Kadriform, dont le bot imite la voix. Ajoute ou remplace des exemples au fil du temps (sans données personnelles d'employés).</p>
+      <textarea id="examplesInput"></textarea>
+
+      <h2>Questions à poser (ordre modifiable)</h2>
+      <p class="hint">Le bot les pose une à la fois, dans cet ordre, en conversation naturelle.</p>
+      <div id="questionsEditor"></div>
+      <button class="icon-btn" id="addQuestionBtn" style="margin-top:4px;">+ Ajouter une question</button>
+
+      <h2>Plateformes et leur ton</h2>
+      <p class="hint">Ajoute une plateforme (ex : TikTok) quand la marque en aura besoin.</p>
+      <div id="platformsEditor"></div>
+      <button class="icon-btn" id="addPlatformBtn" style="margin-top:4px;">+ Ajouter une plateforme</button>
+
+      <div class="modal-actions">
+        <button id="restoreDefaultsBtn" style="margin-right:auto;">Revenir aux réglages d'origine</button>
+        <button id="closeSettingsBtn">Fermer sans enregistrer</button>
+        <button class="primary" id="saveSettingsBtn">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function () {
+
+  const LS = {
+    apiKey: "kadriform_api_key",
+    systemPrompt: "kadriform_system_prompt",
+    questions: "kadriform_questions",
+    platforms: "kadriform_platforms",
+    examples: "kadriform_examples",
+    version: "kadriform_defaults_version"
+  };
+
+  const DEFAULTS_VERSION = "2026-09-30";
+
+  const DEFAULT_SYSTEM_PROMPT = `Tu es l'assistant de rédaction des réseaux sociaux de Kadriform. Tu écris comme Justine Lafortune, directrice d'atelier et directrice artistique, qui signe les publications au nom de toute l'équipe.
+
+QUI EST KADRIFORM
+Kadriform (KADRIFORM Intl) est un atelier de création établi à Sainte-Julienne, dans Lanaudière (Québec). L'entreprise est née en 2000, dans l'effervescence de la toute première édition des Mosaïcultures Internationales de Montréal, quand une dizaine de sculpteurs soudeurs québécois se sont associés pour se spécialiser dans les structures internes des sculptures vivantes. En 2025, Kadriform a souligné ses 25 ans.
+Signature : « Creating meaningful landmarks ». L'atelier conçoit et fabrique des œuvres sculpturales sur mesure en métal (acier, acier inoxydable, aluminium) : structures de sculptures végétales (mosaïculture), sculptures en métal, arches et structures pour des parcours lumineux et immersifs et, depuis 2024, des sculptures en tissage de branches de saule. L'atelier explore aussi la pierre et le verre, en collaboration avec d'autres artistes.
+Le nom : KADRIFORM pour la quatrième dimension, soit la vie que les plantes insufflent aux sculptures.
+Direction : Mathieu Gravel, président depuis 2018 (formation en ingénierie, souvent sur le plancher avec l'équipe ou sur les chantiers). Justine Lafortune, directrice d'atelier et directrice artistique.
+Lieux et clients : jardins botaniques, parcs, villes, espaces publics et parcours immersifs, au Québec, au Canada et aux États-Unis. Nouveau chapitre : Kadriform porte désormais son propre propos artistique, avec une première œuvre présentée en galerie, L'Anatomie de la présence (Oeno Gallery, Prince Edward County, Ontario).
+
+RÉALISATIONS DE RÉFÉRENCE (à citer seulement si c'est pertinent, et avec exactitude)
+2000, La planète est une mosaïque, Mosaïcultures Internationales de Montréal, Vieux-Port de Montréal.
+Années 2000, installations saisonnières de la serre du Bellagio à Las Vegas (conception MIM, fabrication Kadriform), dont Le tableau d'automne, plus de 6 m de haut.
+2009, quatre volumes végétalisés permanents, salle Urban Garden, tour Bank of America, New York (conception MIM).
+2013, L'Arbre aux oiseaux, Jardin botanique de Montréal : 16 m de haut, cime de 18 m, une soixantaine d'espèces d'oiseaux menacées. La plus grosse et la plus complexe pièce de Kadriform.
+2013, Terre-Mère : Prix du public (Mosaïcultures 2013), Prix Frédérick-Bach, Prix d'honneur de Pékin. Installée de façon permanente au Parc Jean-Drapeau depuis 2025.
+2018, sculpture inspirée des figuiers et des guêpes du figuier, Gardens by the Bay, Singapour, fabriquée sur place.
+2018, The Oz Book, Centennial Park, Holland, Michigan. Début d'une relation durable avec le Michigan.
+2018, Le Phénix, Atlanta Botanical Garden (conception MIM).
+2020, mosaïcultures du Flower & Food Festival de Dollywood, Tennessee (conception MIM).
+2022 à 2024, arches et structures pour Moment Factory : Onhwa' Lumina (Wendake), Astra Lumina (Los Angeles), Aquavia Lumina (Lake Delton, Wisconsin, avec près de deux cents petites lampes).
+2025, douze sculptures reprenant l'emblème Terre des Hommes d'Expo 67, Île Sainte-Hélène.
+
+LA VOIX DE KADRIFORM
+Le « nous » collectif, jamais le « je ». On vouvoie la communauté (« nous vous invitons »).
+L'humain avant la technique : on ouvre sur une image, une émotion ou une réflexion, puis on raconte le comment.
+Le travail d'équipe est au cœur de tout : une sculpture monumentale ne prend jamais forme seule. On nomme et on remercie les collaborateurs dont les noms sont fournis.
+On raconte les imprévus et les défis (l'acier introuvable pour Singapour, le cœur de verre fendu à la cuisson) : c'est là que naît l'émotion.
+Une touche d'humour et de fierté québécoise, avec parcimonie : une comparaison inattendue, une expression d'ici.
+Vocabulaire de la maison : matière, présence, geste, savoir-faire, sculpture vivante, tissage, structure, émerveillement, alliés, rêves de grandeur.
+Une phrase de fin courte et mémorable, seule sur sa ligne quand le texte s'y prête.
+Pour une réalisation : un titre au format « Nom de l'œuvre (année, ville, pays) », puis un bloc de crédits (Conception, Fabrication, Horticulture) quand ils sont fournis.
+Pour une publication de fond, une section « 🔍 Pourquoi ce projet compte pour Kadriform » peut conclure le texte.
+
+LES SÉRIES
+Meet the Makers : portrait d'une personne de l'équipe. En tête « ✨🛠️ Meet the Makers 🛠️✨ », puis « Prénom, The Surnom » (The Navigator, The Assembler, The Sculptor, The Weaver...), et 2 à 4 phrases sur son rôle, son parcours et sa façon de travailler la matière. Mots-clics : #Kadriform #Kadriteam #meetthemakers #meettheteam
+Kadriform25 : retour sur une réalisation ou une personne marquante des 25 ans. Titre avec année et lieu, crédits, histoire, pourquoi ça compte. Mots-clics : #Kadriform25 #throwback #rewind
+L'Anatomie de la présence (Oeno Gallery) : série en épisodes sur la première œuvre de galerie. Ton plus introspectif : présence, vulnérabilité, masque, cœur, cicatrice, saule. Mots-clics : #anatomyofpresence #oenogallery
+
+BANQUE DE MOTS-CLICS
+#Kadriform #Kadriform25 #livingsculpture #mosaiculture #outdoorart #metalsculpture #metalart #stainlessteel #willowsculpture #willowweaving #fusionglass #ArtInstallation #BotanicalGarden #sculpture #Patrimoine #entreprisequebecoise
+
+RÈGLES STRICTES
+N'invente jamais un fait, une date, une dimension, un nom, un lieu ou un prix. S'il manque une information, écris sans elle.
+Respecte les crédits : quand Kadriform a fabriqué une œuvre conçue par un partenaire (Mosaïcultures Internationales de Montréal, Moment Factory, etc.), écris « fabriquée par Kadriform » ou « nous avons contribué », jamais « nous avons conçu ».
+Anonymat : ne nomme un membre de l'équipe que si son nom est donné dans la conversation.
+Bilinguisme : pour chaque plateforme, une version française et une version anglaise, chacune écrite pour son public, jamais une traduction mot à mot. En anglais, remplace les expressions québécoises par un équivalent naturel ; le public anglophone comprend des jardins botaniques et des partenaires américains.
+Toujours #Kadriform, plus les mots-clics de la série s'il y a lieu.
+Une seule question à la fois, chaleureuse et brève. Si la personne répond « passe » ou n'a pas l'information, passe à la suite sans insister.`;
+
+  const DEFAULT_EXAMPLES = `EXEMPLE 1 · Meet the Makers (bilingue)
+✨🛠️ Meet the Makers 🛠️✨
+ABC, The Sculptor
+(ENG) Originally a jeweler, ABC brings a deep love for detail and form, transforming cold steel into organic, fluid shapes. She is meticulous and passionate, ensuring that textures and finishes feel alive.
+(FR) D'abord joaillière, ABC apporte un amour profond du détail et des formes, transformant la raideur de l'acier en formes organiques et fluides. Elle est méticuleuse et passionnée, veillant à ce que les textures et les finitions soient vibrantes de vie.
+#Kadriform #Kadriteam #meetthemakers #meettheteam
+
+EXEMPLE 2 · Kadriform25, une réalisation
+Terre-Mère (2013, Montréal, Québec, Canada)
+Conception : Mosaïcultures Internationales de Montréal
+Fabrication : Kadriform Int'l
+Terre-Mère est sans doute l'une des œuvres les plus emblématiques réalisées par notre équipe. Conçue en 2013 (en même temps que l'Arbre aux oiseaux, pouvez-vous le croire ?!), elle a été présentée à plusieurs reprises lors d'événements d'envergure avant de trouver, en 2025, son foyer permanent au Parc Jean-Drapeau.
+Cette structure monumentale est démontable, composée d'une centaine de caissons assemblés mécaniquement.
+🔍 Pourquoi ce projet compte pour Kadriform
+Terre-Mère marque une étape importante dans la maturité artistique de notre équipe. Réalisée grâce à la collaboration d'un large réseau de spécialistes et de créateurs, elle témoigne d'un savoir-faire unique.
+#Kadriform25 #parcjeandrapeau #mosaiculture #livingsculpture #OutdoorArt
+
+EXEMPLE 3 · L'Anatomie de la présence, les coulisses
+Le cœur brisé
+La pièce de verre fusion est le cœur littéral et symbolique de l'œuvre.
+Puis, lors de la cuisson, il s'est fendu en deux. C'est le thème de la pièce elle-même qui a apporté la solution : rester en présence de sa propre souffrance. Ne pas chercher à effacer les blessures.
+Avec Catherine Venne, nous avons tenté une cuisson ultime, lente et très chaude. L'opération à cœur ouvert a été une réussite ! La fusion a réparé la brisure et a laissé une marque indélébile.
+Cette cicatrice fait aujourd'hui partie de l'histoire de la sculpture.
+#fusionglass #kadriform #anatomyofpresence #oenogallery #metalsculpture
+
+EXEMPLE 4 · Un projet modeste, nos valeurs
+Boîtes à lire (2019, Sainte-Thérèse, Québec)
+On retrouve dans divers lieux publics de la ville de Sainte-Thérèse une vingtaine de boîtes à lire en métal. Toutes de couleurs vives, elles peuplent les parcs et jardins urbains.
+Même s'il paraît moins impressionnant que certaines de nos sculptures, ce projet s'inscrit dans nos valeurs les plus profondes : faire une différence dans la vie des gens. Même si on travaille la matière, ce qui compte pour nous est l'expérience offerte et la trace qu'on laisse dans une communauté.
+#Kadriform25 #metalwork #stetherese #boitealire
+
+EXEMPLE 5 · Une touche d'humour
+Un gnome et son fidèle destrier (2023, Québec)
+Conception et horticulture : Yves Vaillancourt, Fermes d'Auteuil
+Fabrication : Kadriform
+Deux compagnons pour le moins singuliers ont fait leur apparition devant l'hôtel Monsieur Jean, au cœur de la capitale : un chien labrador et le gnome qui le chevauche, entièrement en sculpture végétale.
+Notre collaborateur nous a présenté un simple dessin… et une seule mesure ! À partir de là, nos artistes sculpteurs ont imaginé toute la volumétrie de la pièce.
+#Kadriform25 #mosaiculture #livingsculpture #OutdoorArt`;
+
+  const DEFAULT_QUESTIONS = [
+    { id: "type", label: "Quel type de publication prépares-tu ?", options: ["Présentation d'une réalisation", "Coulisses d'atelier ou de fabrication", "Meet the Makers (portrait d'une personne)", "Kadriform25 (souvenir des 25 ans)", "L'Anatomie de la présence (Oeno Gallery)", "Événement ou annonce", "Autre"] },
+    { id: "topic", label: "En quelques mots, de quoi parle-t-on ? (nom de l'œuvre, sujet, moment)", options: [] },
+    { id: "credits", label: "Qui a contribué ? (conception, fabrication, horticulture, collaborateurs à remercier). Seulement les noms que tu veux voir publiés.", options: [] },
+    { id: "details", label: "Quels faits précis inclure ? (année, lieu, dimensions, matériaux, lien)", options: [] },
+    { id: "story", label: "Y a-t-il une anecdote, un imprévu ou une émotion derrière ce sujet ?", options: [] },
+    { id: "visual", label: "Décris la photo ou la vidéo qui accompagne la publication.", options: [] },
+    { id: "angle", label: "Quelle couleur veux-tu donner au texte ?", options: ["Poétique et introspectif", "Chaleureux et humain", "Fier et technique", "Ludique", "Hommage"] },
+    { id: "hashtags", label: "Des mots-clics à ajouter ?", options: [] }
+  ];
+
+  const DEFAULT_PLATFORMS = [
+    { id: "linkedin", name: "LinkedIn", tone: "Voix de l'entreprise, fière et posée. Met de l'avant le savoir-faire, les défis techniques résolus et les collaborateurs (bloc de crédits pour une réalisation). 120 à 220 mots en paragraphes courts. Ouvre sur une idée ou un enjeu, jamais sur une question racoleuse. La section 🔍 Pourquoi ce projet compte pour Kadriform y a toute sa place.", emoji: "0 à 2, seulement comme repère visuel (🔍, ✨), jamais dans la première phrase", hashtags: "#Kadriform, plus 3 à 5 mots-clics métier" },
+    { id: "instagram", name: "Instagram", tone: "Sensoriel, écrit pour accompagner l'image. Première ligne courte qui accroche (une image, une émotion). 50 à 120 mots, phrases courtes, sauts de ligne aérés. Parle de la matière, de la lumière, du geste. Utilise un @ seulement si le compte du collaborateur est fourni.", emoji: "2 à 5, tirés de l'univers de l'atelier et du vivant (✨ 🛠️ 🌿 🔥 🍃), jamais en série décorative", hashtags: "#Kadriform, plus 6 à 10 mots-clics en fin de texte" },
+    { id: "facebook", name: "Facebook", tone: "Chaleureux et narratif, proche de la communauté québécoise et des partenaires. 80 à 180 mots. Un brin d'humour quand le sujet s'y prête. Met en valeur l'ancrage local (Lanaudière, les villes et partenaires) et remercie les gens nommément quand leurs noms sont fournis.", emoji: "1 à 3, liés au contenu", hashtags: "#Kadriform, plus 3 à 5 mots-clics" }
+  ];
+
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const uid = () => "id" + Math.random().toString(36).slice(2, 9);
+
+  // Une nouvelle version des réglages par défaut remplace les anciens réglages enregistrés.
+  (function migrateDefaults() {
+    try {
+      if (localStorage.getItem(LS.version) !== DEFAULTS_VERSION) {
+        [LS.systemPrompt, LS.questions, LS.platforms, LS.examples].forEach(function (k) { localStorage.removeItem(k); });
+        localStorage.setItem(LS.version, DEFAULTS_VERSION);
+      }
+    } catch (e) { /* stockage indisponible, on garde les valeurs par défaut */ }
+  })();
+
+  let state = {
+    systemPrompt: load(LS.systemPrompt, DEFAULT_SYSTEM_PROMPT),
+    examples: load(LS.examples, DEFAULT_EXAMPLES),
+    questions: load(LS.questions, DEFAULT_QUESTIONS),
+    platforms: load(LS.platforms, DEFAULT_PLATFORMS)
+  };
+
+  function load(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return JSON.parse(JSON.stringify(fallback));
+      return JSON.parse(raw);
+    } catch (e) { return JSON.parse(JSON.stringify(fallback)); }
+  }
+  function save(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { console.error("Sauvegarde impossible", e); }
+  }
+
+  const log = $("#log");
+  const input = $("#input");
+  const sendBtn = $("#sendBtn");
+  const resetBtn = $("#resetBtn");
+  const apiKeyInput = $("#apiKeyInput");
+  const keyStatus = $("#keyStatus");
+
+  let history = [];
+
+  function addMessage(role, content) {
+    const div = document.createElement("div");
+    div.className = "msg " + role;
+    div.textContent = content;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    return div;
+  }
+  function addSystemNote(text) {
+    const div = document.createElement("div");
+    div.className = "system-note";
+    div.textContent = text;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+  function addStatus() {
+    const div = document.createElement("div");
+    div.className = "status";
+    div.textContent = "···";
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    return div;
+  }
+
+  function buildSystemPrompt() {
+    const platformsNumbered = state.platforms.map(function (p, i) { return (i + 1) + ". " + p.name; }).join("\n");
+    const platformsSpecs = state.platforms.map(function (p) {
+      return "- " + p.name + " : ton = " + p.tone + " ; émojis = " + p.emoji + " ; mots-clics = " + p.hashtags;
+    }).join("\n");
+    const questionsList = state.questions.map(function (q, i) {
+      let line = (i + 1) + ". " + q.label;
+      if (q.options && q.options.length) {
+        line += "\n   Options a proposer sous forme de liste numerotee : " + q.options.map(function (o, oi) { return (oi + 1) + ") " + o; }).join(" ; ");
+      }
+      return line;
+    }).join("\n");
+
+    return state.systemPrompt +
+
+      (state.examples && state.examples.trim() ?
+        "\n\nEXEMPLES DE PUBLICATIONS DE KADRIFORM\nCes publications ont été écrites par l'équipe. Inspire-toi de leur voix, de leur rythme, de leur structure et de leur façon de doser les émojis et les mots-clics. Ne les recopie jamais et n'en reprends pas les faits, sauf s'ils concernent le sujet demandé.\n\n" + state.examples : "") +
+
+      "\n\nFORMAT DES CHOIX A PROPOSER\n" +
+      "Chaque fois que tu proposes un choix parmi plusieurs options (y compris le choix des plateformes), présente les options sous forme de liste numérotée, un numéro par ligne, par exemple :\n" +
+      "1. LinkedIn\n2. Instagram\n3. Facebook\n" +
+      "Invite ensuite la personne à répondre simplement avec le ou les numéros de son choix (elle peut en choisir plusieurs, séparés par une virgule, par exemple « 1, 3 »). Ne propose jamais un choix parmi plusieurs options sans les numéroter. Pour les questions ouvertes (sans options prédéfinies), laisse la personne répondre librement en texte, sans numéros.\n" +
+
+      "\n\nDÉROULEMENT DE LA CONVERSATION\n" +
+      "Commence ton tout premier message en demandant pour quelles plateformes générer du contenu, en présentant cette liste numérotée :\n" +
+      platformsNumbered +
+      "\n\nUne fois les plateformes choisies, pose les questions suivantes une à la fois, dans cet ordre exact, en attendant la réponse de la personne avant de passer à la suivante. Formule-les naturellement, sans jamais toutes les afficher d'un coup. Quand une question ci-dessous indique des options, présente-les sous forme de liste numérotée comme décrit plus haut ; sinon, laisse la personne répondre librement.\n" +
+      questionsList +
+
+      "\n\nSPÉCIFICATIONS DES PLATEFORMES\n" + platformsSpecs +
+
+      "\n\nUne fois toutes les questions répondues, produis, pour chaque plateforme choisie au début, une version française et une version anglaise complètes et autonomes (jamais une traduction mot à mot), en respectant le ton et la densité d'émojis propres à chaque plateforme, et en incluant les mots-clics indiqués. Présente chaque plateforme sous un titre en majuscules (par exemple LINKEDIN), puis « Version française » et « English version », bien séparées, prêtes à copier. Termine en proposant, sous forme de liste numérotée, quelques ajustements possibles : 1. Plus court, 2. Plus poétique, 3. Plus technique, 4. Autre changement.";
+  }
+
+  async function callClaude(messages) {
+    const apiKey = localStorage.getItem(LS.apiKey);
+    if (!apiKey) throw { code: "no_key", message: "Aucune clé API enregistrée." };
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 4096,
+        system: buildSystemPrompt(),
+        messages: messages
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text().catch(function () { return ""; });
+      throw { code: "http_" + response.status, message: errText };
+    }
+    const data = await response.json();
+    const blocks = (data.content || []).filter(function (b) { return b.type === "text"; }).map(function (b) { return b.text; });
+    return blocks.join("\n");
+  }
+
+  function errorCopy(err) {
+    if (!err) return "Une erreur est survenue.";
+    if (err.code === "no_key") return "Ajoute ta clé API Claude en haut de la page pour commencer.";
+    if (err.code === "http_401") return "Clé API refusée. Vérifie qu'elle est valide et correctement copiée.";
+    if (err.code === "http_429") return "Trop de requêtes en ce moment, réessaie dans un instant.";
+    if (String(err.code || "").indexOf("http_") === 0) return "Le serveur Claude a répondu avec une erreur (" + err.code + ").";
+    return "Erreur de connexion. Réessaie dans un instant.";
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage("user", text);
+    history.push({ role: "user", content: text });
+    input.value = "";
+    input.style.height = "auto";
+    sendBtn.disabled = true;
+
+    const statusEl = addStatus();
+    try {
+      const reply = await callClaude(history);
+      statusEl.remove();
+      addMessage("assistant", reply);
+      history.push({ role: "assistant", content: reply });
+    } catch (err) {
+      statusEl.remove();
+      addMessage("assistant", errorCopy(err));
+    } finally {
+      sendBtn.disabled = false;
+    }
+  }
+
+  async function resetChat() {
+    log.innerHTML = "";
+    history = [];
+    const apiKey = localStorage.getItem(LS.apiKey);
+    if (!apiKey) {
+      addSystemNote("Ajoute ta clé API Claude en haut de la page pour commencer.");
+      return;
+    }
+    const statusEl = addStatus();
+    history.push({ role: "user", content: "Bonjour, je suis prêt à commencer." });
+    try {
+      const reply = await callClaude(history);
+      statusEl.remove();
+      addMessage("assistant", reply);
+      history.push({ role: "assistant", content: reply });
+    } catch (err) {
+      statusEl.remove();
+      addMessage("assistant", errorCopy(err));
+      history = [];
+    }
+  }
+
+  function refreshKeyStatus() {
+    const key = localStorage.getItem(LS.apiKey);
+    keyStatus.textContent = key ? "Clé enregistrée ✓" : "Aucune clé enregistrée";
+  }
+
+  // ---------- Settings modal ----------
+
+  function openSettings() {
+    $("#systemPromptInput").value = state.systemPrompt;
+    $("#examplesInput").value = state.examples;
+    renderQuestionsEditor();
+    renderPlatformsEditor();
+    $("#settingsModal").hidden = false;
+  }
+  function closeSettings() { $("#settingsModal").hidden = true; }
+
+  function syncQuestionsFromDOM() {
+    state.questions = $$(".qrow").map(function (row) {
+      const optionsRaw = $(".q-options", row).value;
+      const options = optionsRaw ? optionsRaw.split(",").map(function (s) { return s.trim(); }).filter(Boolean) : [];
+      return { id: row.dataset.id, label: $(".q-label", row).value, options: options };
+    });
+  }
+  function renderQuestionsEditor() {
+    const wrap = $("#questionsEditor");
+    wrap.innerHTML = "";
+    state.questions.forEach(function (q, idx) {
+      const row = document.createElement("div");
+      row.className = "qrow";
+      row.dataset.id = q.id;
+      const top = document.createElement("div");
+      top.className = "qrow-top";
+      const labelInput = document.createElement("input");
+      labelInput.type = "text";
+      labelInput.className = "q-label";
+      labelInput.value = q.label;
+      top.appendChild(labelInput);
+      top.appendChild(mkIconBtn("↑", idx === 0, function () { syncQuestionsFromDOM(); moveItem(state.questions, idx, -1); renderQuestionsEditor(); }));
+      top.appendChild(mkIconBtn("↓", idx === state.questions.length - 1, function () { syncQuestionsFromDOM(); moveItem(state.questions, idx, 1); renderQuestionsEditor(); }));
+      top.appendChild(mkIconBtn("✕", false, function () { syncQuestionsFromDOM(); state.questions.splice(idx, 1); renderQuestionsEditor(); }));
+      row.appendChild(top);
+
+      const optLabel = document.createElement("span");
+      optLabel.className = "field-label";
+      optLabel.textContent = "Options à proposer sous forme numérotée (séparées par des virgules, laisser vide si question ouverte)";
+      const optInput = document.createElement("input");
+      optInput.type = "text";
+      optInput.className = "q-options";
+      optInput.value = (q.options || []).join(", ");
+      row.appendChild(optLabel);
+      row.appendChild(optInput);
+
+      wrap.appendChild(row);
+    });
+  }
+
+  function syncPlatformsFromDOM() {
+    state.platforms = $$(".prow").map(function (row) {
+      return {
+        id: row.dataset.id,
+        name: $(".p-name", row).value,
+        tone: $(".p-tone", row).value,
+        emoji: $(".p-emoji", row).value,
+        hashtags: $(".p-hashtags", row).value
+      };
+    });
+  }
+  function renderPlatformsEditor() {
+    const wrap = $("#platformsEditor");
+    wrap.innerHTML = "";
+    state.platforms.forEach(function (p, idx) {
+      const row = document.createElement("div");
+      row.className = "prow";
+      row.dataset.id = p.id;
+
+      const top = document.createElement("div");
+      top.className = "prow-top";
+      const nameInput = document.createElement("input");
+      nameInput.type = "text"; nameInput.className = "p-name"; nameInput.value = p.name;
+      top.appendChild(nameInput);
+      top.appendChild(mkIconBtn("↑", idx === 0, function () { syncPlatformsFromDOM(); moveItem(state.platforms, idx, -1); renderPlatformsEditor(); }));
+      top.appendChild(mkIconBtn("↓", idx === state.platforms.length - 1, function () { syncPlatformsFromDOM(); moveItem(state.platforms, idx, 1); renderPlatformsEditor(); }));
+      top.appendChild(mkIconBtn("✕", false, function () { syncPlatformsFromDOM(); state.platforms.splice(idx, 1); renderPlatformsEditor(); }));
+      row.appendChild(top);
+
+      const toneLabel = document.createElement("span"); toneLabel.className = "field-label"; toneLabel.textContent = "Ton";
+      const toneInput = document.createElement("textarea"); toneInput.className = "p-tone"; toneInput.value = p.tone || "";
+      const emojiLabel = document.createElement("span"); emojiLabel.className = "field-label"; emojiLabel.textContent = "Émojis";
+      const emojiInput = document.createElement("input"); emojiInput.type = "text"; emojiInput.className = "p-emoji"; emojiInput.value = p.emoji || "";
+      const hashLabel = document.createElement("span"); hashLabel.className = "field-label"; hashLabel.textContent = "Mots-clics";
+      const hashInput = document.createElement("input"); hashInput.type = "text"; hashInput.className = "p-hashtags"; hashInput.value = p.hashtags || "";
+
+      row.appendChild(toneLabel); row.appendChild(toneInput);
+      row.appendChild(emojiLabel); row.appendChild(emojiInput);
+      row.appendChild(hashLabel); row.appendChild(hashInput);
+      wrap.appendChild(row);
+    });
+  }
+
+  function mkIconBtn(symbol, disabled, onClick) {
+    const b = document.createElement("button");
+    b.className = "icon-btn-sm";
+    b.textContent = symbol;
+    b.type = "button";
+    b.disabled = disabled;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+  function moveItem(arr, idx, dir) {
+    const n = idx + dir;
+    if (n < 0 || n >= arr.length) return;
+    const tmp = arr[idx]; arr[idx] = arr[n]; arr[n] = tmp;
+  }
+
+  // ---------- Events ----------
+
+  sendBtn.addEventListener("click", sendMessage);
+  resetBtn.addEventListener("click", resetChat);
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  input.addEventListener("input", function () {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+  });
+
+  $("#toggleKeyBtn").addEventListener("click", function () {
+    apiKeyInput.type = apiKeyInput.type === "password" ? "text" : "password";
+  });
+  $("#saveKeyBtn").addEventListener("click", function () {
+    const val = apiKeyInput.value.trim();
+    if (val) { localStorage.setItem(LS.apiKey, val); }
+    apiKeyInput.value = "";
+    apiKeyInput.type = "password";
+    refreshKeyStatus();
+    resetChat();
+  });
+
+  $("#settingsBtn").addEventListener("click", openSettings);
+  $("#closeSettingsBtn").addEventListener("click", closeSettings);
+  $("#restoreDefaultsBtn").addEventListener("click", function () {
+    if (!confirm("Remplacer tous les réglages par les réglages d'origine ?")) return;
+    state = {
+      systemPrompt: DEFAULT_SYSTEM_PROMPT,
+      examples: DEFAULT_EXAMPLES,
+      questions: JSON.parse(JSON.stringify(DEFAULT_QUESTIONS)),
+      platforms: JSON.parse(JSON.stringify(DEFAULT_PLATFORMS))
+    };
+    save(LS.systemPrompt, state.systemPrompt);
+    save(LS.examples, state.examples);
+    save(LS.questions, state.questions);
+    save(LS.platforms, state.platforms);
+    openSettings();
+  });
+  $("#addQuestionBtn").addEventListener("click", function () {
+    syncQuestionsFromDOM();
+    state.questions.push({ id: uid(), label: "Nouvelle question", options: [] });
+    renderQuestionsEditor();
+  });
+  $("#addPlatformBtn").addEventListener("click", function () {
+    syncPlatformsFromDOM();
+    state.platforms.push({ id: uid(), name: "Nouvelle plateforme", tone: "", emoji: "", hashtags: "#Kadriform" });
+    renderPlatformsEditor();
+  });
+  $("#saveSettingsBtn").addEventListener("click", function () {
+    state.systemPrompt = $("#systemPromptInput").value;
+    state.examples = $("#examplesInput").value;
+    save(LS.examples, state.examples);
+    syncQuestionsFromDOM();
+    syncPlatformsFromDOM();
+    save(LS.systemPrompt, state.systemPrompt);
+    save(LS.questions, state.questions);
+    save(LS.platforms, state.platforms);
+    closeSettings();
+    addSystemNote("Paramètres mis à jour. Clique sur \u00ab Nouveau contenu \u00bb pour repartir avec les nouveaux réglages.");
+  });
+
+  refreshKeyStatus();
+  resetChat();
+})();
+</script>
+
+</body>
+</html>
