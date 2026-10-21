@@ -8,44 +8,58 @@
   :root {
     --bg: #faf7f2;
     --panel: #ffffff;
+    --sunk: #f3efe7;
     --border: #e3ddd0;
     --text: #2b2620;
     --muted: #6f6656;
     --accent: #4a6b4f;
+    --accent-ink: #ffffff;
     --accent-soft: #e7efe6;
     --danger: #a64b3e;
     --radius: 10px;
+    color-scheme: light;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #1c1a16;
       --panel: #26231d;
+      --sunk: #201e19;
       --border: #3a352c;
       --text: #f1ece2;
       --muted: #b3a996;
       --accent: #8bb391;
+      --accent-ink: #14201a;
       --accent-soft: #2c3a2d;
+      --danger: #e08b7e;
+      color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --bg: #1c1a16;
     --panel: #26231d;
+    --sunk: #201e19;
     --border: #3a352c;
     --text: #f1ece2;
     --muted: #b3a996;
     --accent: #8bb391;
+    --accent-ink: #14201a;
     --accent-soft: #2c3a2d;
+    --danger: #e08b7e;
+    color-scheme: dark;
   }
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
-    height: 100vh;
     display: flex;
     flex-direction: column;
   }
+  button, input, textarea, select { font-family: inherit; color: var(--text); }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* Top bar */
   #topbar {
@@ -65,21 +79,108 @@
     flex: 1;
     border: 1px solid var(--border);
     border-radius: 8px;
+    background: var(--bg);
     padding: 7px 10px;
     font-size: 13px;
     min-width: 160px;
   }
-  .key-row button, #topbar .icon-btn {
+  .ghost {
     background: none;
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 7px 10px;
     font-size: 12px;
     color: var(--muted);
-    cursor: pointer;
   }
+  .ghost:hover { color: var(--text); }
   #keyStatus { font-size: 11px; color: var(--muted); white-space: nowrap; }
   #topbar .actions { display: flex; gap: 8px; }
+
+  /* Main layout */
+  #main {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(320px, 400px) 1fr;
+  }
+  #setup {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px 20px 28px;
+  }
+  #chat { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+
+  /* Setup form */
+  .setup-title { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+  .setup-intro { font-size: 13px; color: var(--muted); margin: 0 0 18px; line-height: 1.5; }
+  fieldset { border: 0; margin: 0 0 20px; padding: 0; min-width: 0; }
+  legend { font-size: 13px; font-weight: 600; padding: 0; margin-bottom: 4px; }
+  .optional { font-weight: 400; color: var(--muted); }
+  .help { font-size: 12px; color: var(--muted); margin: 0 0 8px; line-height: 1.45; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 13px;
+    line-height: 1.3;
+    text-align: left;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  #setup textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    padding: 9px 11px;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical;
+  }
+  #contentInput { min-height: 150px; }
+  #researchNote { min-height: 52px; margin-top: 8px; }
+  .photo-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+  .photo-btn {
+    display: inline-block;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .photo-btn:hover { color: var(--text); border-color: var(--accent); }
+  .photo-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .photo-btn input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .thumb { position: relative; width: 56px; height: 56px; }
+  .thumb img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; display: block; }
+  .thumb button {
+    position: absolute; top: -6px; right: -6px;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--panel);
+    font-size: 10px; line-height: 1; padding: 0;
+  }
+  .form-error { color: var(--danger); font-size: 13px; min-height: 1em; margin: 0 0 10px; }
+  .form-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  /* Summary of the running conversation */
+  .summary-title { font-size: 14px; font-weight: 600; margin: 0 0 10px; }
+  #summaryList { margin: 0 0 14px; font-size: 13px; line-height: 1.45; }
+  #summaryList dt { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  #summaryList dd { margin: 0; overflow-wrap: anywhere; }
 
   /* Chat log */
   #log {
@@ -90,19 +191,27 @@
     flex-direction: column;
     gap: 12px;
   }
+  .empty {
+    margin: auto;
+    max-width: 340px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
   .msg {
     max-width: 78%;
     padding: 10px 14px;
     border-radius: 16px;
     font-size: 14px;
     line-height: 1.6;
-    white-space: pre-wrap;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   }
+  .msg .body { white-space: pre-wrap; overflow-wrap: anywhere; }
   .user {
     align-self: flex-end;
     background: var(--accent);
-    color: white;
+    color: var(--accent-ink);
     border-radius: 16px 16px 4px 16px;
   }
   .assistant {
@@ -111,18 +220,21 @@
     border: 1px solid var(--border);
     border-radius: 16px 16px 16px 4px;
   }
-  .system-note {
-    align-self: center;
-    color: var(--muted);
-    font-size: 12px;
-    text-align: center;
+  .msg-photos { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .msg-photos img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; }
+  .msg-tools { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; }
+  .msg-tools .ghost { padding: 4px 10px; }
+  .system-note { align-self: center; color: var(--muted); font-size: 12px; text-align: center; }
+  .status { align-self: flex-start; color: var(--muted); font-size: 13px; }
+
+  /* Quick adjustments */
+  #quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 16px 10px;
   }
-  .status {
-    align-self: flex-start;
-    color: var(--muted);
-    font-size: 18px;
-    letter-spacing: 3px;
-  }
+  #quick[hidden] { display: none; }
 
   /* Input bar */
   #inputBar {
@@ -139,24 +251,21 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     background: var(--bg);
-    color: var(--text);
     padding: 9px 12px;
     font-size: 14px;
-    font-family: inherit;
     max-height: 120px;
     overflow-y: auto;
   }
-  #inputBar button {
+  #sendBtn {
     background: var(--accent);
-    color: white;
     border: none;
     border-radius: 10px;
     width: 38px;
     height: 38px;
-    cursor: pointer;
     flex-shrink: 0;
   }
-  #inputBar button:disabled { background: var(--border); cursor: not-allowed; }
+  #sendBtn svg { stroke: var(--accent-ink); }
+  #sendBtn:disabled { background: var(--border); cursor: not-allowed; }
 
   /* Settings modal */
   .modal {
@@ -181,38 +290,47 @@
   .modal-content h2 { font-size: 16px; margin: 18px 0 8px; }
   .modal-content h2:first-child { margin-top: 0; }
   .modal-content .hint { font-size: 12px; color: var(--muted); margin: 0 0 10px; }
-  .modal-content textarea, .modal-content input[type="text"], .modal-content select {
+  .modal-content textarea, .modal-content input[type="text"] {
     width: 100%;
     border: 1px solid var(--border);
     border-radius: 8px;
+    background: var(--bg);
     padding: 8px 10px;
     font-size: 13px;
-    font-family: inherit;
   }
   .modal-content textarea { min-height: 60px; resize: vertical; }
   #systemPromptInput, #examplesInput { min-height: 180px; }
-  .qrow, .prow {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 8px;
-  }
-  .qrow-top, .prow-top { display: flex; gap: 8px; margin-bottom: 6px; }
-  .qrow-top input, .prow-top input { flex: 1; }
+  .list-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .list-grid textarea { min-height: 120px; }
+  .prow { border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+  .prow-top { display: flex; gap: 8px; margin-bottom: 6px; }
+  .prow-top input { flex: 1; }
   .icon-btn-sm {
     background: none;
     border: 1px solid var(--border);
     border-radius: 6px;
     width: 28px;
     height: 28px;
-    cursor: pointer;
     font-size: 12px;
     flex-shrink: 0;
   }
   .field-label { font-size: 11px; color: var(--muted); margin: 6px 0 3px; display: block; }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
-  .modal-actions button { padding: 9px 16px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; font-size: 13px; }
-  .modal-actions button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .modal-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .modal-actions button { padding: 9px 16px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; background: var(--panel); }
+  .modal-actions button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  /* Narrow screens: the form first, then the conversation */
+  @media (max-width: 820px) {
+    #main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    #setup { border-right: 0; border-bottom: 1px solid var(--border); }
+    #main:not(.started) #chat { display: none; }
+    #main:not(.started) #setup { grid-row: 1 / span 2; }
+    #main.started #setup { max-height: 45vh; }
+    #main.started.editing #setup { max-height: 75vh; }
+    .msg { max-width: 92%; }
+    .list-grid { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
 </head>
 <body>
@@ -220,51 +338,125 @@
   <div id="topbar">
     <div class="brand">Kadriform <span>assistant de contenu</span></div>
     <div class="key-row">
-      <input id="apiKeyInput" type="password" placeholder="Clé API Claude (sk-ant-...)" autocomplete="off" />
-      <button id="toggleKeyBtn" title="Afficher / masquer">👁</button>
-      <button id="saveKeyBtn">Enregistrer</button>
+      <input id="apiKeyInput" type="password" placeholder="Cl&#xE9; API Claude (sk-ant-...)" autocomplete="off" aria-label="Cl&#xE9; API Claude" />
+      <button class="ghost" id="toggleKeyBtn" title="Afficher ou masquer la cl&#xE9;">&#x1F441;</button>
+      <button class="ghost" id="saveKeyBtn">Enregistrer</button>
       <span id="keyStatus"></span>
     </div>
     <div class="actions">
-      <button class="icon-btn" id="settingsBtn" title="Paramètres">⚙️ Paramètres</button>
-      <button class="icon-btn" id="resetBtn">Nouveau contenu</button>
+      <button class="ghost" id="settingsBtn">&#x2699;&#xFE0F; Param&#xE8;tres</button>
+      <button class="ghost" id="resetBtn">Nouveau contenu</button>
     </div>
   </div>
 
-  <div id="log"></div>
+  <div id="main">
+    <aside id="setup">
 
-  <div id="inputBar">
-    <textarea id="input" rows="1" placeholder="Écris ta réponse... (Maj+Entrée pour sauter une ligne)"></textarea>
-    <button id="sendBtn">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="22" y1="2" x2="11" y2="13" />
-        <polygon points="22 2 15 22 11 13 2 9 22 2" />
-      </svg>
-    </button>
+      <div id="setupSummary" hidden>
+        <p class="summary-title">Param&#xE8;tres de cette discussion</p>
+        <dl id="summaryList"></dl>
+        <button class="ghost" id="editParamsBtn">Modifier les param&#xE8;tres</button>
+      </div>
+
+      <div id="setupForm">
+        <h1 class="setup-title">Nouvelle publication</h1>
+        <p class="setup-intro">Choisis tes param&#xE8;tres, puis lance la discussion. Tu pourras ensuite ajuster les textes directement avec le bot.</p>
+
+        <fieldset>
+          <legend>R&#xE9;seaux sociaux</legend>
+          <p class="help">Un ou plusieurs.</p>
+          <div class="chips" id="platformChips"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Contenu de d&#xE9;part</legend>
+          <p class="help">Tes notes, un texte existant, les cr&#xE9;dits, les faits &#xE0; inclure, une anecdote, ce qu'on voit sur la photo. Le bot n'utilise que ce que tu lui donnes.</p>
+          <textarea id="contentInput" aria-label="Contenu de d&#xE9;part" placeholder="Ex. : Terre-M&#xE8;re, 2013, Mosa&#xEF;cultures. Install&#xE9;e au Parc Jean-Drapeau depuis 2025. Une centaine de caissons d&#xE9;montables..."></textarea>
+          <div class="photo-row">
+            <label class="photo-btn">Ajouter des photos (4 max)
+              <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/gif" multiple />
+            </label>
+            <div id="thumbs" class="photo-row" style="margin-top:0"></div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Recherches compl&#xE9;mentaires <span class="optional">(facultatif)</span></legend>
+          <p class="help">Le bot n'a pas acc&#xE8;s &#xE0; internet. Il puise dans la m&#xE9;moire de l'atelier (r&#xE9;alisations, s&#xE9;ries, exemples) et, si tu le demandes, dans ses connaissances g&#xE9;n&#xE9;rales. Tout fait qui ne vient pas de toi est list&#xE9; &#xE0; part pour v&#xE9;rification.</p>
+          <div class="chips" id="researchChips"></div>
+          <textarea id="researchNote" aria-label="Pr&#xE9;cisions pour la recherche" placeholder="Pr&#xE9;cisions, ex. : faire un lien avec L'Arbre aux oiseaux"></textarea>
+        </fieldset>
+
+        <fieldset>
+          <legend>Ton <span class="optional">(facultatif)</span></legend>
+          <p class="help">Sans choix, le bot garde le ton de marque habituel.</p>
+          <div class="chips" id="toneChips"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Type de publication <span class="optional">(facultatif)</span></legend>
+          <div class="chips" id="typeChips"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>March&#xE9; cibl&#xE9; <span class="optional">(facultatif)</span></legend>
+          <div class="chips" id="marketChips"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Langues</legend>
+          <div class="chips" id="languageChips"></div>
+        </fieldset>
+
+        <p id="formError" class="form-error" role="alert"></p>
+        <div class="form-actions">
+          <button class="primary" id="startBtn">Lancer la discussion</button>
+          <button class="ghost" id="cancelEditBtn" hidden>Annuler</button>
+        </div>
+      </div>
+    </aside>
+
+    <section id="chat" aria-label="Discussion">
+      <div id="log"></div>
+      <div id="quick" hidden></div>
+      <div id="inputBar">
+        <textarea id="input" rows="1" aria-label="Message" placeholder="Demande un ajustement... (Maj+Entr&#xE9;e pour sauter une ligne)"></textarea>
+        <button id="sendBtn" aria-label="Envoyer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13" />
+            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+          </svg>
+        </button>
+      </div>
+    </section>
   </div>
 
   <div class="modal" id="settingsModal" hidden>
-    <div class="modal-content">
-      <h2>Consignes de rédaction (system prompt)</h2>
-      <p class="hint">Ton de marque et règles générales. Ce texte s'applique à toutes les conversations.</p>
+    <div class="modal-content" role="dialog" aria-label="Param&#xE8;tres">
+      <h2>Consignes de r&#xE9;daction (system prompt)</h2>
+      <p class="hint">Ton de marque et r&#xE8;gles g&#xE9;n&#xE9;rales. Ce texte s'applique &#xE0; toutes les discussions.</p>
       <textarea id="systemPromptInput"></textarea>
 
       <h2>Exemples de publications</h2>
-      <p class="hint">Des publications réelles de Kadriform, dont le bot imite la voix. Ajoute ou remplace des exemples au fil du temps (sans données personnelles d'employés).</p>
+      <p class="hint">Des publications r&#xE9;elles de Kadriform, dont le bot imite la voix. Ajoute ou remplace des exemples au fil du temps (sans donn&#xE9;es personnelles d'employ&#xE9;s).</p>
       <textarea id="examplesInput"></textarea>
 
-      <h2>Questions à poser (ordre modifiable)</h2>
-      <p class="hint">Le bot les pose une à la fois, dans cet ordre, en conversation naturelle.</p>
-      <div id="questionsEditor"></div>
-      <button class="icon-btn" id="addQuestionBtn" style="margin-top:4px;">+ Ajouter une question</button>
+      <h2>Choix propos&#xE9;s dans le formulaire</h2>
+      <p class="hint">Une option par ligne.</p>
+      <div class="list-grid">
+        <div><span class="field-label">Recherches compl&#xE9;mentaires</span><textarea id="listResearch"></textarea></div>
+        <div><span class="field-label">Tons</span><textarea id="listTones"></textarea></div>
+        <div><span class="field-label">Types de publication</span><textarea id="listTypes"></textarea></div>
+        <div><span class="field-label">March&#xE9;s</span><textarea id="listMarkets"></textarea></div>
+      </div>
 
       <h2>Plateformes et leur ton</h2>
-      <p class="hint">Ajoute une plateforme (ex : TikTok) quand la marque en aura besoin.</p>
+      <p class="hint">Ajoute une plateforme (ex. : TikTok) quand la marque en aura besoin.</p>
       <div id="platformsEditor"></div>
-      <button class="icon-btn" id="addPlatformBtn" style="margin-top:4px;">+ Ajouter une plateforme</button>
+      <button class="ghost" id="addPlatformBtn" style="margin-top:4px;">+ Ajouter une plateforme</button>
 
       <div class="modal-actions">
-        <button id="restoreDefaultsBtn" style="margin-right:auto;">Revenir aux réglages d'origine</button>
+        <button id="restoreDefaultsBtn" style="margin-right:auto;">Revenir aux r&#xE9;glages d'origine</button>
         <button id="closeSettingsBtn">Fermer sans enregistrer</button>
         <button class="primary" id="saveSettingsBtn">Enregistrer</button>
       </div>
@@ -277,193 +469,462 @@
   const LS = {
     apiKey: "kadriform_api_key",
     systemPrompt: "kadriform_system_prompt",
-    questions: "kadriform_questions",
     platforms: "kadriform_platforms",
     examples: "kadriform_examples",
+    lists: "kadriform_lists",
     version: "kadriform_defaults_version"
   };
 
-  const DEFAULTS_VERSION = "2026-09-30b";
+  const DEFAULTS_VERSION = "2026-10-21b";
+  const MODEL = "claude-sonnet-4-6";
+  const MAX_PHOTOS = 4;
 
-  const DEFAULT_SYSTEM_PROMPT = `Tu es l'assistant de rédaction des réseaux sociaux de Kadriform. Tu écris comme Justine Lafortune, directrice d'atelier et directrice artistique, qui signe les publications au nom de toute l'équipe.
+  const DEFAULT_SYSTEM_PROMPT = `Tu es l'assistant de r\u00e9daction des r\u00e9seaux sociaux de Kadriform. Tu \u00e9cris comme Justine Lafortune, directrice d'atelier et directrice artistique, qui signe les publications au nom de toute l'\u00e9quipe.
 
 QUI EST KADRIFORM
-Kadriform (KADRIFORM Intl) est un atelier de création établi à Sainte-Julienne, dans Lanaudière (Québec). L'entreprise est née en 2000, dans l'effervescence de la toute première édition des Mosaïcultures Internationales de Montréal, quand une dizaine de sculpteurs soudeurs québécois se sont associés pour se spécialiser dans les structures internes des sculptures vivantes. En 2025, Kadriform a souligné ses 25 ans.
-Signature : « Creating meaningful landmarks ». L'atelier conçoit et fabrique des œuvres sculpturales sur mesure en métal (acier, acier inoxydable, aluminium) : structures de sculptures végétales (mosaïculture), sculptures en métal, arches et structures pour des parcours lumineux et immersifs et, depuis 2024, des sculptures en tissage de branches de saule. L'atelier explore aussi la pierre et le verre, en collaboration avec d'autres artistes.
-Le nom : KADRIFORM pour la quatrième dimension, soit la vie que les plantes insufflent aux sculptures.
-Direction : Mathieu Gravel, président depuis 2018 (formation en ingénierie, souvent sur le plancher avec l'équipe ou sur les chantiers). Justine Lafortune, directrice d'atelier et directrice artistique.
-Lieux et clients : jardins botaniques, parcs, villes, espaces publics et parcours immersifs, au Québec, au Canada et aux États-Unis. Nouveau chapitre : Kadriform porte désormais son propre propos artistique, avec une première œuvre présentée en galerie, L'Anatomie de la présence (Oeno Gallery, Prince Edward County, Ontario).
+Kadriform (KADRIFORM Intl) est un atelier de cr\u00e9ation \u00e9tabli \u00e0 Sainte-Julienne, dans Lanaudi\u00e8re (Qu\u00e9bec). L'entreprise est n\u00e9e en 2000, dans l'effervescence de la toute premi\u00e8re \u00e9dition des Mosa\u00efcultures Internationales de Montr\u00e9al, quand une dizaine de sculpteurs soudeurs qu\u00e9b\u00e9cois se sont associ\u00e9s pour se sp\u00e9cialiser dans les structures internes des sculptures vivantes. En 2025, Kadriform a soulign\u00e9 ses 25 ans.
+Signature : \u00ab Creating meaningful landmarks \u00bb. L'atelier con\u00e7oit et fabrique des \u0153uvres sculpturales sur mesure en m\u00e9tal (acier, acier inoxydable, aluminium) : structures de sculptures v\u00e9g\u00e9tales (mosa\u00efculture), sculptures en m\u00e9tal, arches et structures pour des parcours lumineux et immersifs et, depuis 2024, des sculptures en tissage de branches de saule. L'atelier explore aussi la pierre et le verre, en collaboration avec d'autres artistes.
+Le nom : KADRIFORM pour la quatri\u00e8me dimension, soit la vie que les plantes insufflent aux sculptures.
+Direction : Mathieu Gravel, pr\u00e9sident depuis 2018 (formation en ing\u00e9nierie, souvent sur le plancher avec l'\u00e9quipe ou sur les chantiers). Justine Lafortune, directrice d'atelier et directrice artistique.
+Lieux et clients : jardins botaniques, parcs, villes, espaces publics et parcours immersifs, au Qu\u00e9bec, au Canada et aux \u00c9tats-Unis. Nouveau chapitre : Kadriform porte d\u00e9sormais son propre propos artistique, avec une premi\u00e8re \u0153uvre pr\u00e9sent\u00e9e en galerie, L'Anatomie de la pr\u00e9sence (Oeno Gallery, Prince Edward County, Ontario).
 
-RÉALISATIONS DE RÉFÉRENCE (à citer seulement si c'est pertinent, et avec exactitude)
-2000, La planète est une mosaïque, Mosaïcultures Internationales de Montréal, Vieux-Port de Montréal.
-Années 2000, installations saisonnières de la serre du Bellagio à Las Vegas (conception MIM, fabrication Kadriform), dont Le tableau d'automne, plus de 6 m de haut.
-2009, quatre volumes végétalisés permanents, salle Urban Garden, tour Bank of America, New York (conception MIM).
-2013, L'Arbre aux oiseaux, Jardin botanique de Montréal : 16 m de haut, cime de 18 m, une soixantaine d'espèces d'oiseaux menacées. La plus grosse et la plus complexe pièce de Kadriform.
-2013, Terre-Mère : Prix du public (Mosaïcultures 2013), Prix Frédérick-Bach, Prix d'honneur de Pékin. Installée de façon permanente au Parc Jean-Drapeau depuis 2025.
-2018, sculpture inspirée des figuiers et des guêpes du figuier, Gardens by the Bay, Singapour, fabriquée sur place.
-2018, The Oz Book, Centennial Park, Holland, Michigan. Début d'une relation durable avec le Michigan.
-2018, Le Phénix, Atlanta Botanical Garden (conception MIM).
-2020, mosaïcultures du Flower & Food Festival de Dollywood, Tennessee (conception MIM).
-2022 à 2024, arches et structures pour Moment Factory : Onhwa' Lumina (Wendake), Astra Lumina (Los Angeles), Aquavia Lumina (Lake Delton, Wisconsin, avec près de deux cents petites lampes).
-2025, douze sculptures reprenant l'emblème Terre des Hommes d'Expo 67, Île Sainte-Hélène.
+R\u00c9ALISATIONS DE R\u00c9F\u00c9RENCE (\u00e0 citer seulement si c'est pertinent, et avec exactitude)
+2000, La plan\u00e8te est une mosa\u00efque, Mosa\u00efcultures Internationales de Montr\u00e9al, Vieux-Port de Montr\u00e9al.
+Ann\u00e9es 2000, installations saisonni\u00e8res de la serre du Bellagio \u00e0 Las Vegas (conception MIM, fabrication Kadriform), dont Le tableau d'automne, plus de 6 m de haut.
+2009, quatre volumes v\u00e9g\u00e9talis\u00e9s permanents, salle Urban Garden, tour Bank of America, New York (conception MIM).
+2013, L'Arbre aux oiseaux, Jardin botanique de Montr\u00e9al : 16 m de haut, cime de 18 m, une soixantaine d'esp\u00e8ces d'oiseaux menac\u00e9es. La plus grosse et la plus complexe pi\u00e8ce de Kadriform.
+2013, Terre-M\u00e8re : Prix du public (Mosa\u00efcultures 2013), Prix Fr\u00e9d\u00e9rick-Bach, Prix d'honneur de P\u00e9kin. Install\u00e9e de fa\u00e7on permanente au Parc Jean-Drapeau depuis 2025.
+2018, sculpture inspir\u00e9e des figuiers et des gu\u00eapes du figuier, Gardens by the Bay, Singapour, fabriqu\u00e9e sur place.
+2018, The Oz Book, Centennial Park, Holland, Michigan. D\u00e9but d'une relation durable avec le Michigan.
+2018, Le Ph\u00e9nix, Atlanta Botanical Garden (conception MIM).
+2020, mosa\u00efcultures du Flower & Food Festival de Dollywood, Tennessee (conception MIM).
+2022 \u00e0 2024, arches et structures pour Moment Factory : Onhwa' Lumina (Wendake), Astra Lumina (Los Angeles), Aquavia Lumina (Lake Delton, Wisconsin, avec pr\u00e8s de deux cents petites lampes).
+2025, douze sculptures reprenant l'embl\u00e8me Terre des Hommes d'Expo 67, \u00cele Sainte-H\u00e9l\u00e8ne.
 
 LA VOIX DE KADRIFORM
-Le « nous » collectif, jamais le « je ». On vouvoie la communauté (« nous vous invitons »).
-L'humain avant la technique : on ouvre sur une image, une émotion ou une réflexion, puis on raconte le comment.
-Le travail d'équipe est au cœur de tout : une sculpture monumentale ne prend jamais forme seule. On nomme et on remercie les collaborateurs dont les noms sont fournis.
-On raconte les imprévus et les défis (l'acier introuvable pour Singapour, le cœur de verre fendu à la cuisson) : c'est là que naît l'émotion.
-Une touche d'humour et de fierté québécoise, avec parcimonie : une comparaison inattendue, une expression d'ici.
-Vocabulaire de la maison : matière, présence, geste, savoir-faire, sculpture vivante, tissage, structure, émerveillement, alliés, rêves de grandeur.
-Une phrase de fin courte et mémorable, seule sur sa ligne quand le texte s'y prête.
-Pour une réalisation : un titre au format « Nom de l'œuvre (année, ville, pays) », puis un bloc de crédits (Conception, Fabrication, Horticulture) quand ils sont fournis.
+Le \u00ab nous \u00bb collectif, jamais le \u00ab je \u00bb. On vouvoie la communaut\u00e9 (\u00ab nous vous invitons \u00bb).
+L'humain avant la technique : on ouvre sur une image, une \u00e9motion ou une r\u00e9flexion, puis on raconte le comment.
+Le travail d'\u00e9quipe est au c\u0153ur de tout : une sculpture monumentale ne prend jamais forme seule. On nomme et on remercie les collaborateurs dont les noms sont fournis.
+On raconte les impr\u00e9vus et les d\u00e9fis (l'acier introuvable pour Singapour, le c\u0153ur de verre fendu \u00e0 la cuisson) : c'est l\u00e0 que na\u00eet l'\u00e9motion.
+Une touche d'humour et de fiert\u00e9 qu\u00e9b\u00e9coise, avec parcimonie : une comparaison inattendue, une expression d'ici.
+Vocabulaire de la maison : mati\u00e8re, pr\u00e9sence, geste, savoir-faire, sculpture vivante, tissage, structure, \u00e9merveillement, alli\u00e9s, r\u00eaves de grandeur.
+Une phrase de fin courte et m\u00e9morable, seule sur sa ligne quand le texte s'y pr\u00eate.
+Pour une r\u00e9alisation : un titre au format \u00ab Nom de l'\u0153uvre (ann\u00e9e, ville, pays) \u00bb, puis un bloc de cr\u00e9dits (Conception, Fabrication, Horticulture) quand ils sont fournis.
 
-LES SÉRIES
-Meet the Makers : portrait d'une personne de l'équipe. En tête « ✨🛠️ Meet the Makers 🛠️✨ », puis « Prénom, The Surnom » (The Navigator, The Assembler, The Sculptor, The Weaver...), et 2 à 4 phrases sur son rôle, son parcours et sa façon de travailler la matière. Mots-clics : #Kadriform #Kadriteam #meetthemakers #meettheteam
-Kadriform25 : retour sur une réalisation ou une personne marquante des 25 ans. Titre avec année et lieu, crédits, histoire. Mots-clics : #Kadriform25 #throwback #rewind
-L'Anatomie de la présence (Oeno Gallery) : série en épisodes sur la première œuvre de galerie. Ton plus introspectif : présence, vulnérabilité, masque, cœur, cicatrice, saule. Mots-clics : #anatomyofpresence #oenogallery
+LES S\u00c9RIES
+Meet the Makers : portrait d'une personne de l'\u00e9quipe. En t\u00eate \u00ab \u2728\ud83d\udee0\ufe0f Meet the Makers \ud83d\udee0\ufe0f\u2728 \u00bb, puis \u00ab Pr\u00e9nom, The Surnom \u00bb (The Navigator, The Assembler, The Sculptor, The Weaver...), et 2 \u00e0 4 phrases sur son r\u00f4le, son parcours et sa fa\u00e7on de travailler la mati\u00e8re. Mots-clics : #Kadriform #Kadriteam #meetthemakers #meettheteam
+Kadriform25 : retour sur une r\u00e9alisation ou une personne marquante des 25 ans. Titre avec ann\u00e9e et lieu, cr\u00e9dits, histoire. Mots-clics : #Kadriform25 #throwback #rewind
+L'Anatomie de la pr\u00e9sence (Oeno Gallery) : s\u00e9rie en \u00e9pisodes sur la premi\u00e8re \u0153uvre de galerie. Ton plus introspectif : pr\u00e9sence, vuln\u00e9rabilit\u00e9, masque, c\u0153ur, cicatrice, saule. Mots-clics : #anatomyofpresence #oenogallery
 
 BANQUE DE MOTS-CLICS
 #Kadriform #Kadriform25 #livingsculpture #mosaiculture #outdoorart #metalsculpture #metalart #stainlessteel #willowsculpture #willowweaving #fusionglass #ArtInstallation #BotanicalGarden #sculpture #Patrimoine #entreprisequebecoise
 
-RÈGLES STRICTES
-N'invente jamais un fait, une date, une dimension, un nom, un lieu ou un prix. S'il manque une information, écris sans elle.
-Respecte les crédits : quand Kadriform a fabriqué une œuvre conçue par un partenaire (Mosaïcultures Internationales de Montréal, Moment Factory, etc.), écris « fabriquée par Kadriform » ou « nous avons contribué », jamais « nous avons conçu ».
-Anonymat : ne nomme un membre de l'équipe que si son nom est donné dans la conversation.
-Bilinguisme : pour chaque plateforme, une version française et une version anglaise, chacune écrite pour son public, jamais une traduction mot à mot. En anglais, remplace les expressions québécoises par un équivalent naturel ; le public anglophone comprend des jardins botaniques et des partenaires américains.
-Toujours #Kadriform, plus les mots-clics de la série s'il y a lieu.
-Une seule question à la fois, chaleureuse et brève. Si la personne répond « passe » ou n'a pas l'information, passe à la suite sans insister.
+R\u00c8GLES STRICTES
+N'invente jamais un fait, une date, une dimension, un nom, un lieu ou un prix. S'il manque une information, \u00e9cris sans elle. Les faits tir\u00e9s de tes connaissances g\u00e9n\u00e9rales suivent la section RECHERCHES COMPL\u00c9MENTAIRES.
+Respecte les cr\u00e9dits : quand Kadriform a fabriqu\u00e9 une \u0153uvre con\u00e7ue par un partenaire (Mosa\u00efcultures Internationales de Montr\u00e9al, Moment Factory, etc.), \u00e9cris \u00ab fabriqu\u00e9e par Kadriform \u00bb ou \u00ab nous avons contribu\u00e9 \u00bb, jamais \u00ab nous avons con\u00e7u \u00bb.
+Anonymat : ne nomme un membre de l'\u00e9quipe que si son nom est donn\u00e9 dans la conversation.
+Bilinguisme : par d\u00e9faut, une version fran\u00e7aise et une version anglaise pour chaque plateforme, chacune \u00e9crite pour son public, jamais une traduction mot \u00e0 mot. Si une seule langue est demand\u00e9e, ne produis que celle-l\u00e0. En anglais, remplace les expressions qu\u00e9b\u00e9coises par un \u00e9quivalent naturel ; le public anglophone comprend des jardins botaniques et des partenaires am\u00e9ricains.
+Toujours #Kadriform, plus les mots-clics de la s\u00e9rie s'il y a lieu.
 
 LONGUEUR
-N'ajoute jamais de paragraphe explicatif du type « Pourquoi ce projet compte pour Kadriform ». Reste centré sur l'histoire de l'œuvre.
+N'ajoute jamais de paragraphe explicatif du type \u00ab Pourquoi ce projet compte pour Kadriform \u00bb. Reste centr\u00e9 sur l'histoire de l'\u0153uvre.
 
 MOTS-CLICS
-Les mots-clics suivent la langue de chaque version : en français dans la version française (ex. #sculpturevivante #tissagedesaule #artpublic #jardinbotanique), en anglais dans la version anglaise. #Kadriform reste identique dans les deux. Propose toujours des mots-clics, même si aucun n'est demandé.
+Les mots-clics suivent la langue de chaque version : en fran\u00e7ais dans la version fran\u00e7aise (ex. #sculpturevivante #tissagedesaule #artpublic #jardinbotanique), en anglais dans la version anglaise. #Kadriform reste identique dans les deux. Propose toujours des mots-clics, m\u00eame si aucun n'est demand\u00e9.
 
-MARCHÉ CIBLÉ
-Adapte le ton au marché indiqué :
-Québec : chaleureux, sensible, place à la poésie.
+MARCH\u00c9 CIBL\u00c9
+Adapte le ton au march\u00e9 indiqu\u00e9 :
+Qu\u00e9bec : chaleureux, sensible, place \u00e0 la po\u00e9sie.
 Reste du Canada : chaleureux mais plus sobre, moins lyrique.
-Midwest américain : direct et concret, phrases courtes, aucune envolée poétique. Mets de l'avant le résultat, l'expérience des visiteurs et le partenariat.
-Nord-Est américain : professionnel et culturel, met de l'avant la démarche artistique et le rayonnement.
-Général : ton de marque habituel.
+Midwest am\u00e9ricain : direct et concret, phrases courtes, aucune envol\u00e9e po\u00e9tique. Mets de l'avant le r\u00e9sultat, l'exp\u00e9rience des visiteurs et le partenariat.
+Nord-Est am\u00e9ricain : professionnel et culturel, met de l'avant la d\u00e9marche artistique et le rayonnement.
+G\u00e9n\u00e9ral ou non pr\u00e9cis\u00e9 : ton de marque habituel.
+
+RECHERCHES COMPL\u00c9MENTAIRES
+Tu n'as pas acc\u00e8s \u00e0 internet. Ne pr\u00e9tends jamais avoir consult\u00e9 un site ou une source en ligne.
+Quand la personne demande des recherches compl\u00e9mentaires, puise d'abord dans R\u00c9ALISATIONS DE R\u00c9F\u00c9RENCE, LES S\u00c9RIES, la BANQUE DE MOTS-CLICS et les EXEMPLES DE PUBLICATIONS. Ce que la personne a fourni a toujours priorit\u00e9.
+Pour le contexte g\u00e9n\u00e9ral d'un lieu ou d'un partenaire, tu peux t'appuyer sur tes connaissances g\u00e9n\u00e9rales, seulement pour des faits largement \u00e9tablis. En cas de doute, n'utilise pas le fait.
+Apr\u00e8s les publications, liste sous le titre \u00ab \u00c0 v\u00e9rifier avant publication \u00bb chaque fait qui ne vient ni de la personne ni des sections ci-dessus.
+Ne propose jamais de @ : tu ne peux pas v\u00e9rifier qu'un compte existe.
+Sans recherche demand\u00e9e, n'ajoute aucun fait tir\u00e9 de tes connaissances g\u00e9n\u00e9rales.
+
+PHOTOS
+Quand des photos sont jointes, sers-t'en pour l'accroche et les d\u00e9tails sensoriels (formes, lumi\u00e8re, couleurs, \u00e9chelle). N'en d\u00e9duis pas de faits que tu ne peux pas confirmer (mat\u00e9riau exact, lieu, date).
 
 MOMENT DE PUBLICATION
-Après les publications, propose 3 créneaux (jour et heure, heure de l'Est) adaptés à la plateforme, au type de contenu et au marché, avec une courte justification. Précise qu'il s'agit de repères généraux à valider avec leurs propres statistiques.
+Apr\u00e8s les publications, propose 3 cr\u00e9neaux (jour et heure, heure de l'Est) adapt\u00e9s \u00e0 la plateforme, au type de contenu et au march\u00e9, avec une courte justification. Pr\u00e9cise qu'il s'agit de rep\u00e8res g\u00e9n\u00e9raux \u00e0 valider avec leurs propres statistiques.
 
 AUTOCRITIQUE
-Termine toujours en demandant : « Veux-tu que je fasse l'autocritique de ces publications ? 1. Oui  2. Non ».
-Si oui, sois franc et concret, plateforme par plateforme :
+Quand on te demande l'autocritique, sois franc et concret, plateforme par plateforme :
 1. Ce qui fonctionne.
-2. Ce qui sonne générique ou « écrit par une IA » (formules toutes faites, structure prévisible, adjectifs vides).
-3. Ce qui manque pour cette plateforme (accroche, longueur, appel à l'action, lien avec le visuel).
-4. Les répétitions de structure ou de ton par rapport aux exemples des paramètres et aux publications déjà générées dans cette conversation, avec un angle différent à essayer.
-Finis par 2 ou 3 pistes de réécriture précises. Ne réécris pas la publication sauf si on te le demande.`;
+2. Ce qui sonne g\u00e9n\u00e9rique ou \u00ab \u00e9crit par une IA \u00bb (formules toutes faites, structure pr\u00e9visible, adjectifs vides).
+3. Ce qui manque pour cette plateforme (accroche, longueur, appel \u00e0 l'action, lien avec le visuel).
+4. Les r\u00e9p\u00e9titions de structure ou de ton par rapport aux exemples des param\u00e8tres et aux publications d\u00e9j\u00e0 g\u00e9n\u00e9r\u00e9es dans cette conversation, avec un angle diff\u00e9rent \u00e0 essayer.
+Finis par 2 ou 3 pistes de r\u00e9\u00e9criture pr\u00e9cises. Ne r\u00e9\u00e9cris pas la publication sauf si on te le demande.`;
 
-  const DEFAULT_EXAMPLES = `EXEMPLE 1 · Meet the Makers (bilingue)
-✨🛠️ Meet the Makers 🛠️✨
+  const DEFAULT_EXAMPLES = `EXEMPLE 1 \u00b7 Meet the Makers (bilingue)
+\u2728\ud83d\udee0\ufe0f Meet the Makers \ud83d\udee0\ufe0f\u2728
 ABC, The Sculptor
 (ENG) Originally a jeweler, ABC brings a deep love for detail and form, transforming cold steel into organic, fluid shapes. She is meticulous and passionate, ensuring that textures and finishes feel alive.
-(FR) D'abord joaillière, ABC apporte un amour profond du détail et des formes, transformant la raideur de l'acier en formes organiques et fluides. Elle est méticuleuse et passionnée, veillant à ce que les textures et les finitions soient vibrantes de vie.
+(FR) D'abord joailli\u00e8re, ABC apporte un amour profond du d\u00e9tail et des formes, transformant la raideur de l'acier en formes organiques et fluides. Elle est m\u00e9ticuleuse et passionn\u00e9e, veillant \u00e0 ce que les textures et les finitions soient vibrantes de vie.
 #Kadriform #Kadriteam #meetthemakers #meettheteam
 
-EXEMPLE 2 · Kadriform25, une réalisation
-Terre-Mère (2013, Montréal, Québec, Canada)
-Conception : Mosaïcultures Internationales de Montréal
+EXEMPLE 2 \u00b7 Kadriform25, une r\u00e9alisation
+Terre-M\u00e8re (2013, Montr\u00e9al, Qu\u00e9bec, Canada)
+Conception : Mosa\u00efcultures Internationales de Montr\u00e9al
 Fabrication : Kadriform Int'l
-Terre-Mère est sans doute l'une des œuvres les plus emblématiques réalisées par notre équipe. Conçue en 2013 (en même temps que l'Arbre aux oiseaux, pouvez-vous le croire ?!), elle a été présentée à plusieurs reprises lors d'événements d'envergure avant de trouver, en 2025, son foyer permanent au Parc Jean-Drapeau.
-Cette structure monumentale est démontable, composée d'une centaine de caissons assemblés mécaniquement.
+Terre-M\u00e8re est sans doute l'une des \u0153uvres les plus embl\u00e9matiques r\u00e9alis\u00e9es par notre \u00e9quipe. Con\u00e7ue en 2013 (en m\u00eame temps que l'Arbre aux oiseaux, pouvez-vous le croire ?!), elle a \u00e9t\u00e9 pr\u00e9sent\u00e9e \u00e0 plusieurs reprises lors d'\u00e9v\u00e9nements d'envergure avant de trouver, en 2025, son foyer permanent au Parc Jean-Drapeau.
+Cette structure monumentale est d\u00e9montable, compos\u00e9e d'une centaine de caissons assembl\u00e9s m\u00e9caniquement.
 #Kadriform25 #parcjeandrapeau #mosaiculture #livingsculpture #OutdoorArt
 
-EXEMPLE 3 · L'Anatomie de la présence, les coulisses
-Le cœur brisé
-La pièce de verre fusion est le cœur littéral et symbolique de l'œuvre.
-Puis, lors de la cuisson, il s'est fendu en deux. C'est le thème de la pièce elle-même qui a apporté la solution : rester en présence de sa propre souffrance. Ne pas chercher à effacer les blessures.
-Avec Catherine Venne, nous avons tenté une cuisson ultime, lente et très chaude. L'opération à cœur ouvert a été une réussite ! La fusion a réparé la brisure et a laissé une marque indélébile.
+EXEMPLE 3 \u00b7 L'Anatomie de la pr\u00e9sence, les coulisses
+Le c\u0153ur bris\u00e9
+La pi\u00e8ce de verre fusion est le c\u0153ur litt\u00e9ral et symbolique de l'\u0153uvre.
+Puis, lors de la cuisson, il s'est fendu en deux. C'est le th\u00e8me de la pi\u00e8ce elle-m\u00eame qui a apport\u00e9 la solution : rester en pr\u00e9sence de sa propre souffrance. Ne pas chercher \u00e0 effacer les blessures.
+Avec Catherine Venne, nous avons tent\u00e9 une cuisson ultime, lente et tr\u00e8s chaude. L'op\u00e9ration \u00e0 c\u0153ur ouvert a \u00e9t\u00e9 une r\u00e9ussite ! La fusion a r\u00e9par\u00e9 la brisure et a laiss\u00e9 une marque ind\u00e9l\u00e9bile.
 Cette cicatrice fait aujourd'hui partie de l'histoire de la sculpture.
 #fusionglass #kadriform #anatomyofpresence #oenogallery #metalsculpture
 
-EXEMPLE 4 · Un projet modeste, nos valeurs
-Boîtes à lire (2019, Sainte-Thérèse, Québec)
-On retrouve dans divers lieux publics de la ville de Sainte-Thérèse une vingtaine de boîtes à lire en métal. Toutes de couleurs vives, elles peuplent les parcs et jardins urbains.
-Même s'il paraît moins impressionnant que certaines de nos sculptures, ce projet s'inscrit dans nos valeurs les plus profondes : faire une différence dans la vie des gens. Même si on travaille la matière, ce qui compte pour nous est l'expérience offerte et la trace qu'on laisse dans une communauté.
+EXEMPLE 4 \u00b7 Un projet modeste, nos valeurs
+Bo\u00eetes \u00e0 lire (2019, Sainte-Th\u00e9r\u00e8se, Qu\u00e9bec)
+On retrouve dans divers lieux publics de la ville de Sainte-Th\u00e9r\u00e8se une vingtaine de bo\u00eetes \u00e0 lire en m\u00e9tal. Toutes de couleurs vives, elles peuplent les parcs et jardins urbains.
+M\u00eame s'il para\u00eet moins impressionnant que certaines de nos sculptures, ce projet s'inscrit dans nos valeurs les plus profondes : faire une diff\u00e9rence dans la vie des gens. M\u00eame si on travaille la mati\u00e8re, ce qui compte pour nous est l'exp\u00e9rience offerte et la trace qu'on laisse dans une communaut\u00e9.
 #Kadriform25 #metalwork #stetherese #boitealire
 
-EXEMPLE 5 · Une touche d'humour
-Un gnome et son fidèle destrier (2023, Québec)
+EXEMPLE 5 \u00b7 Une touche d'humour
+Un gnome et son fid\u00e8le destrier (2023, Qu\u00e9bec)
 Conception et horticulture : Yves Vaillancourt, Fermes d'Auteuil
 Fabrication : Kadriform
-Deux compagnons pour le moins singuliers ont fait leur apparition devant l'hôtel Monsieur Jean, au cœur de la capitale : un chien labrador et le gnome qui le chevauche, entièrement en sculpture végétale.
-Notre collaborateur nous a présenté un simple dessin… et une seule mesure ! À partir de là, nos artistes sculpteurs ont imaginé toute la volumétrie de la pièce.
+Deux compagnons pour le moins singuliers ont fait leur apparition devant l'h\u00f4tel Monsieur Jean, au c\u0153ur de la capitale : un chien labrador et le gnome qui le chevauche, enti\u00e8rement en sculpture v\u00e9g\u00e9tale.
+Notre collaborateur nous a pr\u00e9sent\u00e9 un simple dessin\u2026 et une seule mesure ! \u00c0 partir de l\u00e0, nos artistes sculpteurs ont imagin\u00e9 toute la volum\u00e9trie de la pi\u00e8ce.
 #Kadriform25 #mosaiculture #livingsculpture #OutdoorArt`;
 
-  const DEFAULT_QUESTIONS = [
-    { id: "type", label: "Quel type de publication prépares-tu ?", options: ["Présentation d'une réalisation", "Coulisses d'atelier ou de fabrication", "Meet the Makers (portrait d'une personne)", "Kadriform25 (souvenir des 25 ans)", "L'Anatomie de la présence (Oeno Gallery)", "Événement ou annonce", "Autre"] },
-    { id: "market", label: "Pour quel marché cette publication est-elle ciblée ?", options: ["Québec", "Reste du Canada", "Midwest américain", "Nord-Est américain (New York, Pennsylvanie)", "Général"] },
-    { id: "topic", label: "En quelques mots, de quoi parle-t-on ? (nom de l'œuvre, sujet, moment)", options: [] },
-    { id: "credits", label: "Qui a contribué ? (conception, fabrication, horticulture, collaborateurs à remercier). Seulement les noms que tu veux voir publiés.", options: [] },
-    { id: "details", label: "Quels faits précis inclure ? (année, lieu, dimensions, matériaux, lien)", options: [] },
-    { id: "story", label: "Y a-t-il une anecdote, un imprévu ou une émotion derrière ce sujet ?", options: [] },
-    { id: "visual", label: "Décris la photo ou la vidéo qui accompagne la publication.", options: [] },
-    { id: "angle", label: "Quelle couleur veux-tu donner au texte ?", options: ["Poétique et introspectif", "Chaleureux et humain", "Fier et technique", "Ludique", "Hommage"] },
-    { id: "hashtags", label: "Des mots-clics à ajouter ?", options: [] }
+  const DEFAULT_LISTS = {
+    research: ["Lier \u00e0 nos r\u00e9alisations pass\u00e9es", "Mots-clics de notre banque", "Angles inspir\u00e9s de nos exemples", "Contexte g\u00e9n\u00e9ral du lieu ou du partenaire (\u00e0 v\u00e9rifier)"],
+    tones: ["Po\u00e9tique et introspectif", "Chaleureux et humain", "Fier et technique", "Ludique", "Hommage"],
+    types: ["Pr\u00e9sentation d'une r\u00e9alisation", "Coulisses d'atelier ou de fabrication", "Meet the Makers (portrait d'une personne)", "Kadriform25 (souvenir des 25 ans)", "L'Anatomie de la pr\u00e9sence (Oeno Gallery)", "\u00c9v\u00e9nement ou annonce"],
+    markets: ["Qu\u00e9bec", "Reste du Canada", "Midwest am\u00e9ricain", "Nord-Est am\u00e9ricain (New York, Pennsylvanie)", "G\u00e9n\u00e9ral"]
+  };
+
+  const LANGUAGES = ["Fran\u00e7ais et anglais", "Fran\u00e7ais seulement", "Anglais seulement"];
+
+  const QUICK_ACTIONS = [
+    { label: "Autocritique", prompt: "Fais l'autocritique de ces publications." },
+    { label: "Plus court", prompt: "Rends les publications plus courtes, en gardant l'essentiel." },
+    { label: "Plus po\u00e9tique", prompt: "Rends les publications plus po\u00e9tiques, sans perdre les faits." },
+    { label: "Plus technique", prompt: "Mets davantage de l'avant le savoir-faire et les d\u00e9fis techniques." },
+    { label: "Autres accroches", prompt: "Propose deux autres accroches pour chaque plateforme." }
   ];
 
   const DEFAULT_PLATFORMS = [
-    { id: "linkedin", name: "LinkedIn", tone: "Voix de l'entreprise, fière et posée. Met de l'avant le savoir-faire, les défis techniques résolus et les collaborateurs (bloc de crédits pour une réalisation). 120 à 220 mots en paragraphes courts. Ouvre sur une idée ou un enjeu, jamais sur une question racoleuse.", emoji: "0 à 2, seulement comme repère visuel (🔍, ✨), jamais dans la première phrase", hashtags: "#Kadriform, plus 3 à 5 mots-clics métier" },
-    { id: "instagram", name: "Instagram", tone: "Sensoriel, écrit pour accompagner l'image. Première ligne courte qui accroche (une image, une émotion). 50 à 120 mots, phrases courtes, sauts de ligne aérés. Parle de la matière, de la lumière, du geste. Utilise un @ seulement si le compte du collaborateur est fourni.", emoji: "2 à 5, tirés de l'univers de l'atelier et du vivant (✨ 🛠️ 🌿 🔥 🍃), jamais en série décorative", hashtags: "#Kadriform, plus 6 à 10 mots-clics en fin de texte" },
-    { id: "facebook", name: "Facebook", tone: "Chaleureux et narratif, proche de la communauté québécoise et des partenaires. 80 à 180 mots. Un brin d'humour quand le sujet s'y prête. Met en valeur l'ancrage local (Lanaudière, les villes et partenaires) et remercie les gens nommément quand leurs noms sont fournis.", emoji: "1 à 3, liés au contenu", hashtags: "#Kadriform, plus 3 à 5 mots-clics" }
+    { id: "linkedin", name: "LinkedIn", tone: "Voix de l'entreprise, fi\u00e8re et pos\u00e9e. Met de l'avant le savoir-faire, les d\u00e9fis techniques r\u00e9solus et les collaborateurs (bloc de cr\u00e9dits pour une r\u00e9alisation). 120 \u00e0 220 mots en paragraphes courts. Ouvre sur une id\u00e9e ou un enjeu, jamais sur une question racoleuse.", emoji: "0 \u00e0 2, seulement comme rep\u00e8re visuel (\ud83d\udd0d, \u2728), jamais dans la premi\u00e8re phrase", hashtags: "#Kadriform, plus 3 \u00e0 5 mots-clics m\u00e9tier" },
+    { id: "instagram", name: "Instagram", tone: "Sensoriel, \u00e9crit pour accompagner l'image. Premi\u00e8re ligne courte qui accroche (une image, une \u00e9motion). 50 \u00e0 120 mots, phrases courtes, sauts de ligne a\u00e9r\u00e9s. Parle de la mati\u00e8re, de la lumi\u00e8re, du geste. Utilise un @ seulement si le compte du collaborateur est fourni.", emoji: "2 \u00e0 5, tir\u00e9s de l'univers de l'atelier et du vivant (\u2728 \ud83d\udee0\ufe0f \ud83c\udf3f \ud83d\udd25 \ud83c\udf43), jamais en s\u00e9rie d\u00e9corative", hashtags: "#Kadriform, plus 6 \u00e0 10 mots-clics en fin de texte" },
+    { id: "facebook", name: "Facebook", tone: "Chaleureux et narratif, proche de la communaut\u00e9 qu\u00e9b\u00e9coise et des partenaires. 80 \u00e0 180 mots. Un brin d'humour quand le sujet s'y pr\u00eate. Met en valeur l'ancrage local (Lanaudi\u00e8re, les villes et partenaires) et remercie les gens nomm\u00e9ment quand leurs noms sont fournis.", emoji: "1 \u00e0 3, li\u00e9s au contenu", hashtags: "#Kadriform, plus 3 \u00e0 5 mots-clics" }
   ];
 
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
   const uid = () => "id" + Math.random().toString(36).slice(2, 9);
+  const clone = (v) => JSON.parse(JSON.stringify(v));
 
-  // Une nouvelle version des réglages par défaut remplace les anciens réglages enregistrés.
+  // Une nouvelle version des r\u00e9glages par d\u00e9faut remplace les anciens r\u00e9glages enregistr\u00e9s.
   (function migrateDefaults() {
     try {
       if (localStorage.getItem(LS.version) !== DEFAULTS_VERSION) {
-        [LS.systemPrompt, LS.questions, LS.platforms, LS.examples].forEach(function (k) { localStorage.removeItem(k); });
+        [LS.systemPrompt, LS.platforms, LS.examples, LS.lists, "kadriform_questions"].forEach(function (k) { localStorage.removeItem(k); });
         localStorage.setItem(LS.version, DEFAULTS_VERSION);
       }
-    } catch (e) { /* stockage indisponible, on garde les valeurs par défaut */ }
+    } catch (e) { /* stockage indisponible, on garde les valeurs par d\u00e9faut */ }
   })();
-
-  let state = {
-    systemPrompt: load(LS.systemPrompt, DEFAULT_SYSTEM_PROMPT),
-    examples: load(LS.examples, DEFAULT_EXAMPLES),
-    questions: load(LS.questions, DEFAULT_QUESTIONS),
-    platforms: load(LS.platforms, DEFAULT_PLATFORMS)
-  };
 
   function load(key, fallback) {
     try {
       const raw = localStorage.getItem(key);
-      if (!raw) return JSON.parse(JSON.stringify(fallback));
+      if (!raw) return clone(fallback);
       return JSON.parse(raw);
-    } catch (e) { return JSON.parse(JSON.stringify(fallback)); }
+    } catch (e) { return clone(fallback); }
   }
   function save(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { console.error("Sauvegarde impossible", e); }
   }
+  function getKey() {
+    try { return localStorage.getItem(LS.apiKey); } catch (e) { return null; }
+  }
 
+  let state = {
+    systemPrompt: load(LS.systemPrompt, DEFAULT_SYSTEM_PROMPT),
+    examples: load(LS.examples, DEFAULT_EXAMPLES),
+    platforms: load(LS.platforms, DEFAULT_PLATFORMS),
+    lists: load(LS.lists, DEFAULT_LISTS)
+  };
+
+  function emptyParams() {
+    return { platforms: [], content: "", images: [], research: [], researchNote: "", tone: "", type: "", market: "", language: LANGUAGES[0] };
+  }
+
+  let params = emptyParams();
+  let history = [];
+  let researchOn = false;
+  let busy = false;
+
+  const main = $("#main");
   const log = $("#log");
   const input = $("#input");
   const sendBtn = $("#sendBtn");
-  const resetBtn = $("#resetBtn");
+  const quick = $("#quick");
   const apiKeyInput = $("#apiKeyInput");
   const keyStatus = $("#keyStatus");
+  const formError = $("#formError");
 
-  let history = [];
+  // ---------- Form ----------
 
-  function addMessage(role, content) {
+  function renderChipGroup(container, options, isSelected, onToggle) {
+    container.innerHTML = "";
+    options.forEach(function (opt) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = opt;
+      b.setAttribute("aria-pressed", isSelected(opt) ? "true" : "false");
+      b.addEventListener("click", function () { onToggle(opt); renderForm(); });
+      container.appendChild(b);
+    });
+  }
+  function toggleIn(arr, v) {
+    const i = arr.indexOf(v);
+    if (i >= 0) arr.splice(i, 1); else arr.push(v);
+  }
+
+  function renderForm() {
+    const names = state.platforms.map(function (p) { return p.name; });
+    params.platforms = params.platforms.filter(function (n) { return names.indexOf(n) >= 0; });
+    renderChipGroup($("#platformChips"), names,
+      function (o) { return params.platforms.indexOf(o) >= 0; },
+      function (o) { toggleIn(params.platforms, o); });
+    renderChipGroup($("#researchChips"), state.lists.research,
+      function (o) { return params.research.indexOf(o) >= 0; },
+      function (o) { toggleIn(params.research, o); });
+    renderChipGroup($("#toneChips"), state.lists.tones,
+      function (o) { return params.tone === o; },
+      function (o) { params.tone = params.tone === o ? "" : o; });
+    renderChipGroup($("#typeChips"), state.lists.types,
+      function (o) { return params.type === o; },
+      function (o) { params.type = params.type === o ? "" : o; });
+    renderChipGroup($("#marketChips"), state.lists.markets,
+      function (o) { return params.market === o; },
+      function (o) { params.market = params.market === o ? "" : o; });
+    renderChipGroup($("#languageChips"), LANGUAGES,
+      function (o) { return params.language === o; },
+      function (o) { params.language = o; });
+    renderThumbs();
+  }
+
+  function renderThumbs() {
+    const wrap = $("#thumbs");
+    wrap.innerHTML = "";
+    params.images.forEach(function (img, i) {
+      const t = document.createElement("div");
+      t.className = "thumb";
+      const im = document.createElement("img");
+      im.src = img.preview;
+      im.alt = img.name;
+      const x = document.createElement("button");
+      x.type = "button";
+      x.textContent = "\u2715";
+      x.setAttribute("aria-label", "Retirer " + img.name);
+      x.addEventListener("click", function () { params.images.splice(i, 1); renderThumbs(); });
+      t.appendChild(im);
+      t.appendChild(x);
+      wrap.appendChild(t);
+    });
+  }
+
+  // Les photos sont r\u00e9duites (1568 px max) pour rester l\u00e9g\u00e8res dans les appels \u00e0 l'API.
+  function fileToJpeg(file) {
+    return new Promise(function (resolve, reject) {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = function () {
+        const max = 1568;
+        const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+        const w = Math.round(img.naturalWidth * s), h = Math.round(img.naturalHeight * s);
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        const dataUrl = c.toDataURL("image/jpeg", 0.85);
+        resolve({ name: file.name, preview: dataUrl, data: dataUrl.split(",")[1] });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error("format")); };
+      img.src = url;
+    });
+  }
+
+  $("#photoInput").addEventListener("change", async function (e) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    formError.textContent = "";
+    for (const f of files) {
+      if (params.images.length >= MAX_PHOTOS) { formError.textContent = "Maximum " + MAX_PHOTOS + " photos."; break; }
+      try { params.images.push(await fileToJpeg(f)); }
+      catch (err) { formError.textContent = "Impossible de lire " + f.name + ". Utilise une photo JPEG ou PNG."; }
+    }
+    renderThumbs();
+  });
+
+  function readTextFields() {
+    params.content = $("#contentInput").value.trim();
+    params.researchNote = $("#researchNote").value.trim();
+  }
+
+  function buildKickoff() {
+    const lines = ["Voici les param\u00e8tres de la publication.", ""];
+    lines.push("Plateformes : " + params.platforms.join(", "));
+    lines.push("Langues : " + params.language);
+    lines.push("Ton : " + (params.tone || "ton de marque habituel"));
+    if (params.type) lines.push("Type de publication : " + params.type);
+    lines.push("March\u00e9 cibl\u00e9 : " + (params.market || "G\u00e9n\u00e9ral"));
+    if (researchOn) {
+      lines.push("Recherches compl\u00e9mentaires : " + (params.research.length ? params.research.join(" ; ") : "selon les pr\u00e9cisions"));
+      if (params.researchNote) lines.push("Pr\u00e9cisions pour la recherche : " + params.researchNote);
+    } else {
+      lines.push("Recherches compl\u00e9mentaires : aucune");
+    }
+    if (params.images.length) lines.push("Photos jointes : " + params.images.length);
+    lines.push("");
+    lines.push("Contenu de d\u00e9part :");
+    lines.push(params.content || "(aucun texte, seulement les photos)");
+    lines.push("");
+    lines.push("R\u00e9dige les publications.");
+    return lines.join("\n");
+  }
+
+  function renderSummary() {
+    const dl = $("#summaryList");
+    dl.innerHTML = "";
+    const rows = [
+      ["R\u00e9seaux", params.platforms.join(", ")],
+      ["Contenu de d\u00e9part", params.content ? (params.content.length > 160 ? params.content.slice(0, 160) + "\u2026" : params.content) : "Photos seulement"],
+      ["Recherches", researchOn ? (params.research.concat(params.researchNote ? [params.researchNote] : [])).join(" ; ") : "Aucune"],
+      ["Ton", params.tone || "Ton de marque habituel"],
+      ["Type", params.type || "Non pr\u00e9cis\u00e9"],
+      ["March\u00e9", params.market || "G\u00e9n\u00e9ral"],
+      ["Langues", params.language]
+    ];
+    if (params.images.length) rows.splice(2, 0, ["Photos", String(params.images.length)]);
+    rows.forEach(function (r) {
+      const dt = document.createElement("dt"); dt.textContent = r[0];
+      const dd = document.createElement("dd"); dd.textContent = r[1];
+      dl.appendChild(dt); dl.appendChild(dd);
+    });
+  }
+
+  function showForm(editing) {
+    $("#setupSummary").hidden = true;
+    $("#setupForm").hidden = false;
+    $("#cancelEditBtn").hidden = !editing;
+    $("#startBtn").textContent = editing ? "Relancer avec ces param\u00e8tres" : "Lancer la discussion";
+    main.classList.toggle("editing", !!editing);
+    $("#setup").scrollTop = 0;
+  }
+  function showSummary() {
+    renderSummary();
+    $("#setupForm").hidden = true;
+    $("#setupSummary").hidden = false;
+    main.classList.remove("editing");
+  }
+
+  async function startConversation() {
+    readTextFields();
+    formError.textContent = "";
+    if (!getKey()) { formError.textContent = "Ajoute ta cl\u00e9 API Claude en haut de la page."; return; }
+    if (!params.platforms.length) { formError.textContent = "Choisis au moins un r\u00e9seau social."; return; }
+    if (!params.content && !params.images.length) { formError.textContent = "Ajoute un contenu de d\u00e9part (texte ou photo)."; return; }
+    if (busy) return;
+
+    researchOn = params.research.length > 0 || params.researchNote.length > 0;
+    const text = buildKickoff();
+    const content = params.images.map(function (img) {
+      return { type: "image", source: { type: "base64", media_type: "image/jpeg", data: img.data } };
+    }).concat([{ type: "text", text: text }]);
+
+    history = [{ role: "user", content: content }];
+    log.innerHTML = "";
+    quick.hidden = true;
+    main.classList.add("started");
+    showSummary();
+    addMessage("user", text, { photos: params.images });
+
+    const ok = await runAssistant();
+    if (!ok) {
+      history = [];
+      showForm(false);
+      formError.textContent = "La discussion n'a pas pu d\u00e9marrer. Le d\u00e9tail est dans la conversation.";
+    }
+  }
+
+  // ---------- Conversation ----------
+
+  function clearEmpty() { const e = $(".empty", log); if (e) e.remove(); }
+  function showEmpty() {
+    log.innerHTML = "";
+    const d = document.createElement("div");
+    d.className = "empty";
+    d.textContent = "Choisis tes param\u00e8tres, puis lance la discussion. Les publications appara\u00eetront ici.";
+    log.appendChild(d);
+  }
+
+  function copyText(text, btn) {
+    const done = function () { btn.textContent = "Copi\u00e9"; setTimeout(function () { btn.textContent = "Copier"; }, 1500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { legacyCopy(text); done(); });
+    } else { legacyCopy(text); done(); }
+  }
+  function legacyCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) { /* rien */ }
+    ta.remove();
+  }
+
+  function addMessage(role, text, opts) {
+    opts = opts || {};
+    clearEmpty();
     const div = document.createElement("div");
     div.className = "msg " + role;
-    div.textContent = content;
+    if (opts.photos && opts.photos.length) {
+      const ph = document.createElement("div");
+      ph.className = "msg-photos";
+      opts.photos.forEach(function (p) { const im = document.createElement("img"); im.src = p.preview; im.alt = p.name; ph.appendChild(im); });
+      div.appendChild(ph);
+    }
+    const body = document.createElement("div");
+    body.className = "body";
+    body.textContent = text;
+    div.appendChild(body);
+
+    if (role === "assistant" && opts.copyable) {
+      const tools = document.createElement("div");
+      tools.className = "msg-tools";
+      const copyBtn = document.createElement("button");
+      copyBtn.type = "button";
+      copyBtn.className = "ghost";
+      copyBtn.textContent = "Copier";
+      copyBtn.addEventListener("click", function () { copyText(text, copyBtn); });
+      tools.appendChild(copyBtn);
+      div.appendChild(tools);
+    }
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
     return div;
   }
   function addSystemNote(text) {
+    clearEmpty();
     const div = document.createElement("div");
     div.className = "system-note";
     div.textContent = text;
@@ -473,133 +934,152 @@ Notre collaborateur nous a présenté un simple dessin… et une seule mesure ! 
   function addStatus() {
     const div = document.createElement("div");
     div.className = "status";
-    div.textContent = "···";
+    div.setAttribute("role", "status");
+    div.textContent = "R\u00e9daction en cours\u2026";
     log.appendChild(div);
     log.scrollTop = log.scrollHeight;
     return div;
   }
 
+  function setBusy(v) {
+    busy = v;
+    sendBtn.disabled = v;
+    $("#startBtn").disabled = v;
+    $$("button", quick).forEach(function (b) { b.disabled = v; });
+  }
+
+  function renderQuick() {
+    quick.innerHTML = "";
+    QUICK_ACTIONS.forEach(function (q) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = q.label;
+      b.addEventListener("click", function () { sendMessage(q.prompt); });
+      quick.appendChild(b);
+    });
+    quick.hidden = false;
+  }
+
+  async function runAssistant() {
+    setBusy(true);
+    const statusEl = addStatus();
+    try {
+      const reply = await callClaude(history);
+      statusEl.remove();
+      addMessage("assistant", reply.text, { copyable: true });
+      history.push({ role: "assistant", content: reply.text });
+      renderQuick();
+      return true;
+    } catch (err) {
+      statusEl.remove();
+      addMessage("assistant", errorCopy(err));
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendMessage(preset) {
+    const text = (preset || input.value).trim();
+    if (!text || busy) return;
+    if (!history.length) { showForm(false); formError.textContent = "Lance d'abord la discussion avec tes param\u00e8tres."; return; }
+    addMessage("user", text);
+    history.push({ role: "user", content: text });
+    if (!preset) { input.value = ""; input.style.height = "auto"; }
+    const ok = await runAssistant();
+    if (!ok) {
+      history.pop();
+      if (!preset) input.value = text;
+    }
+  }
+
+  // ---------- API ----------
+
   function buildSystemPrompt() {
-    const platformsNumbered = state.platforms.map(function (p, i) { return (i + 1) + ". " + p.name; }).join("\n");
     const platformsSpecs = state.platforms.map(function (p) {
-      return "- " + p.name + " : ton = " + p.tone + " ; émojis = " + p.emoji + " ; mots-clics = " + p.hashtags;
-    }).join("\n");
-    const questionsList = state.questions.map(function (q, i) {
-      let line = (i + 1) + ". " + q.label;
-      if (q.options && q.options.length) {
-        line += "\n   Options a proposer sous forme de liste numerotee : " + q.options.map(function (o, oi) { return (oi + 1) + ") " + o; }).join(" ; ");
-      }
-      return line;
+      return "- " + p.name + " : ton = " + p.tone + " ; \u00e9mojis = " + p.emoji + " ; mots-clics = " + p.hashtags;
     }).join("\n");
 
     return state.systemPrompt +
 
       (state.examples && state.examples.trim() ?
-        "\n\nEXEMPLES DE PUBLICATIONS DE KADRIFORM\nCes publications ont été écrites par l'équipe. Inspire-toi de leur voix, de leur rythme, de leur structure et de leur façon de doser les émojis et les mots-clics. Ne les recopie jamais et n'en reprends pas les faits, sauf s'ils concernent le sujet demandé.\n\n" + state.examples : "") +
+        "\n\nEXEMPLES DE PUBLICATIONS DE KADRIFORM\nCes publications ont \u00e9t\u00e9 \u00e9crites par l'\u00e9quipe. Inspire-toi de leur voix, de leur rythme, de leur structure et de leur fa\u00e7on de doser les \u00e9mojis et les mots-clics. Ne les recopie jamais et n'en reprends pas les faits, sauf s'ils concernent le sujet demand\u00e9.\n\n" + state.examples : "") +
 
-      "\n\nFORMAT DES CHOIX A PROPOSER\n" +
-      "Chaque fois que tu proposes un choix parmi plusieurs options (y compris le choix des plateformes), présente les options sous forme de liste numérotée, un numéro par ligne, par exemple :\n" +
-      "1. LinkedIn\n2. Instagram\n3. Facebook\n" +
-      "Invite ensuite la personne à répondre simplement avec le ou les numéros de son choix (elle peut en choisir plusieurs, séparés par une virgule, par exemple « 1, 3 »). Ne propose jamais un choix parmi plusieurs options sans les numéroter. Pour les questions ouvertes (sans options prédéfinies), laisse la personne répondre librement en texte, sans numéros.\n" +
+      "\n\nSP\u00c9CIFICATIONS DES PLATEFORMES\n" + platformsSpecs +
 
-      "\n\nDÉROULEMENT DE LA CONVERSATION\n" +
-      "Commence ton tout premier message en demandant pour quelles plateformes générer du contenu, en présentant cette liste numérotée :\n" +
-      platformsNumbered +
-      "\n\nUne fois les plateformes choisies, pose les questions suivantes une à la fois, dans cet ordre exact, en attendant la réponse de la personne avant de passer à la suivante. Formule-les naturellement, sans jamais toutes les afficher d'un coup. Quand une question ci-dessous indique des options, présente-les sous forme de liste numérotée comme décrit plus haut ; sinon, laisse la personne répondre librement.\n" +
-      questionsList +
-
-      "\n\nSPÉCIFICATIONS DES PLATEFORMES\n" + platformsSpecs +
-
-      "\n\nUne fois toutes les questions répondues, produis, pour chaque plateforme choisie au début, une version française et une version anglaise complètes et autonomes (jamais une traduction mot à mot), en respectant le ton et la densité d'émojis propres à chaque plateforme, et en incluant les mots-clics indiqués (en français dans la version française, en anglais dans la version anglaise). Adapte le ton au marché ciblé indiqué. Présente chaque plateforme sous un titre en majuscules (par exemple LINKEDIN), puis « Version française » et « English version », bien séparées, prêtes à copier. Ajoute ensuite les 3 créneaux de publication suggérés (voir MOMENT DE PUBLICATION), puis termine par la question d'autocritique (voir AUTOCRITIQUE). Si la personne répond Non, ou une fois l'autocritique faite, propose sous forme de liste numérotée quelques ajustements possibles : 1. Plus court, 2. Plus poétique, 3. Plus technique, 4. Autre changement.";
+      "\n\nFONCTIONNEMENT\n" +
+      "La personne remplit un formulaire puis lance la discussion. Son premier message contient tous ses param\u00e8tres : plateformes, contenu de d\u00e9part, recherches souhait\u00e9es, ton, type, march\u00e9 et langues. Ne pose pas de questionnaire : r\u00e9dige directement \u00e0 partir de ces \u00e9l\u00e9ments. Si une information essentielle manque vraiment, r\u00e9dige quand m\u00eame avec ce que tu as, puis signale en une phrase ce qu'il serait utile d'ajouter.\n" +
+      "Pour chaque plateforme demand\u00e9e, \u00e9cris un titre en majuscules (par exemple LINKEDIN), puis \u00ab Version fran\u00e7aise \u00bb et \u00ab English version \u00bb (ou seulement la langue demand\u00e9e), bien s\u00e9par\u00e9es et pr\u00eates \u00e0 copier. Respecte la longueur, les \u00e9mojis et les mots-clics propres \u00e0 chaque plateforme, et adapte le ton au march\u00e9 cibl\u00e9.\n" +
+      "Apr\u00e8s les publications : les 3 cr\u00e9neaux sugg\u00e9r\u00e9s (voir MOMENT DE PUBLICATION), puis, s'il y a lieu, la section \u00ab \u00c0 v\u00e9rifier avant publication \u00bb.\n" +
+      "N'utilise aucune mise en forme Markdown (pas d'ast\u00e9risques, pas de titres pr\u00e9c\u00e9d\u00e9s de #) : le texte est copi\u00e9 tel quel sur les r\u00e9seaux.\n" +
+      "Ne termine pas par une liste d'options : l'interface offre d\u00e9j\u00e0 des boutons pour l'autocritique et les ajustements. Ensuite, la discussion est libre : quand on te demande un ajustement, ne r\u00e9\u00e9cris que ce qui est demand\u00e9. Si tu dois proposer un choix, num\u00e9rote les options.";
   }
 
-  async function callClaude(messages) {
-    const apiKey = localStorage.getItem(LS.apiKey);
-    if (!apiKey) throw { code: "no_key", message: "Aucune clé API enregistrée." };
+  async function postMessages(messages) {
+    const body = {
+      model: MODEL,
+      max_tokens: 8000,
+      system: buildSystemPrompt(),
+      messages: messages
+    };
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey,
+        "x-api-key": getKey(),
         "anthropic-version": "2023-06-01",
         "anthropic-dangerous-direct-browser-access": "true"
       },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 4096,
-        system: buildSystemPrompt(),
-        messages: messages
-      })
+      body: JSON.stringify(body)
     });
-
     if (!response.ok) {
       const errText = await response.text().catch(function () { return ""; });
       throw { code: "http_" + response.status, message: errText };
     }
-    const data = await response.json();
-    const blocks = (data.content || []).filter(function (b) { return b.type === "text"; }).map(function (b) { return b.text; });
-    return blocks.join("\n");
+    return response.json();
+  }
+
+  async function callClaude(messages) {
+    if (!getKey()) throw { code: "no_key", message: "Aucune cl\u00e9 API enregistr\u00e9e." };
+
+    const data = await postMessages(messages);
+    const text = (data.content || []).filter(function (b) { return b.type === "text"; }).map(function (b) { return b.text; }).join("\n").trim();
+    if (!text) throw { code: "empty", message: "" };
+    return { text: text };
   }
 
   function errorCopy(err) {
     if (!err) return "Une erreur est survenue.";
-    if (err.code === "no_key") return "Ajoute ta clé API Claude en haut de la page pour commencer.";
-    if (err.code === "http_401") return "Clé API refusée. Vérifie qu'elle est valide et correctement copiée.";
-    if (err.code === "http_429") return "Trop de requêtes en ce moment, réessaie dans un instant.";
-    if (String(err.code || "").indexOf("http_") === 0) return "Le serveur Claude a répondu avec une erreur (" + err.code + ").";
-    return "Erreur de connexion. Réessaie dans un instant.";
+    if (err.code === "no_key") return "Ajoute ta cl\u00e9 API Claude en haut de la page pour commencer.";
+    if (err.code === "empty") return "Le bot n'a renvoy\u00e9 aucun texte. R\u00e9essaie.";
+    if (err.code === "http_401") return "Cl\u00e9 API refus\u00e9e. V\u00e9rifie qu'elle est valide et correctement copi\u00e9e.";
+    if (err.code === "http_429") return "Trop de requ\u00eates en ce moment, r\u00e9essaie dans un instant.";
+    if (String(err.code || "").indexOf("http_") === 0) return "Le serveur Claude a r\u00e9pondu avec une erreur (" + err.code + ").";
+    return "Erreur de connexion. R\u00e9essaie dans un instant.";
   }
 
-  async function sendMessage() {
-    const text = input.value.trim();
-    if (!text) return;
+  // ---------- Reset ----------
 
-    addMessage("user", text);
-    history.push({ role: "user", content: text });
-    input.value = "";
-    input.style.height = "auto";
-    sendBtn.disabled = true;
-
-    const statusEl = addStatus();
-    try {
-      const reply = await callClaude(history);
-      statusEl.remove();
-      addMessage("assistant", reply);
-      history.push({ role: "assistant", content: reply });
-    } catch (err) {
-      statusEl.remove();
-      addMessage("assistant", errorCopy(err));
-    } finally {
-      sendBtn.disabled = false;
-    }
-  }
-
-  async function resetChat() {
-    log.innerHTML = "";
+  function resetAll(skipConfirm) {
+    if (!skipConfirm && history.length && !confirm("Commencer un nouveau contenu efface la discussion en cours. Continuer ?")) return;
+    params = emptyParams();
     history = [];
-    const apiKey = localStorage.getItem(LS.apiKey);
-    if (!apiKey) {
-      addSystemNote("Ajoute ta clé API Claude en haut de la page pour commencer.");
-      return;
-    }
-    const statusEl = addStatus();
-    history.push({ role: "user", content: "Bonjour, je suis prêt à commencer." });
-    try {
-      const reply = await callClaude(history);
-      statusEl.remove();
-      addMessage("assistant", reply);
-      history.push({ role: "assistant", content: reply });
-    } catch (err) {
-      statusEl.remove();
-      addMessage("assistant", errorCopy(err));
-      history = [];
-    }
+    researchOn = false;
+    $("#contentInput").value = "";
+    $("#researchNote").value = "";
+    formError.textContent = "";
+    quick.hidden = true;
+    main.classList.remove("started", "editing");
+    renderForm();
+    showForm(false);
+    showEmpty();
+    if (!getKey()) addSystemNote("Ajoute ta cl\u00e9 API Claude en haut de la page pour commencer.");
   }
 
   function refreshKeyStatus() {
-    const key = localStorage.getItem(LS.apiKey);
-    keyStatus.textContent = key ? "Clé enregistrée ✓" : "Aucune clé enregistrée";
+    keyStatus.textContent = getKey() ? "Cl\u00e9 enregistr\u00e9e \u2713" : "Aucune cl\u00e9 enregistr\u00e9e";
   }
 
   // ---------- Settings modal ----------
@@ -607,63 +1087,31 @@ Notre collaborateur nous a présenté un simple dessin… et une seule mesure ! 
   function openSettings() {
     $("#systemPromptInput").value = state.systemPrompt;
     $("#examplesInput").value = state.examples;
-    renderQuestionsEditor();
+    $("#listResearch").value = state.lists.research.join("\n");
+    $("#listTones").value = state.lists.tones.join("\n");
+    $("#listTypes").value = state.lists.types.join("\n");
+    $("#listMarkets").value = state.lists.markets.join("\n");
     renderPlatformsEditor();
     $("#settingsModal").hidden = false;
   }
-  function closeSettings() { $("#settingsModal").hidden = true; }
-
-  function syncQuestionsFromDOM() {
-    state.questions = $$(".qrow").map(function (row) {
-      const optionsRaw = $(".q-options", row).value;
-      // Les virgules entre parenthèses font partie de l'option, ex. « Nord-Est américain (New York, Pennsylvanie) ».
-      const options = optionsRaw ? optionsRaw.split(/,(?![^()]*\))/).map(function (s) { return s.trim(); }).filter(Boolean) : [];
-      return { id: row.dataset.id, label: $(".q-label", row).value, options: options };
-    });
+  function closeSettings() {
+    state.platforms = load(LS.platforms, DEFAULT_PLATFORMS);
+    $("#settingsModal").hidden = true;
   }
-  function renderQuestionsEditor() {
-    const wrap = $("#questionsEditor");
-    wrap.innerHTML = "";
-    state.questions.forEach(function (q, idx) {
-      const row = document.createElement("div");
-      row.className = "qrow";
-      row.dataset.id = q.id;
-      const top = document.createElement("div");
-      top.className = "qrow-top";
-      const labelInput = document.createElement("input");
-      labelInput.type = "text";
-      labelInput.className = "q-label";
-      labelInput.value = q.label;
-      top.appendChild(labelInput);
-      top.appendChild(mkIconBtn("↑", idx === 0, function () { syncQuestionsFromDOM(); moveItem(state.questions, idx, -1); renderQuestionsEditor(); }));
-      top.appendChild(mkIconBtn("↓", idx === state.questions.length - 1, function () { syncQuestionsFromDOM(); moveItem(state.questions, idx, 1); renderQuestionsEditor(); }));
-      top.appendChild(mkIconBtn("✕", false, function () { syncQuestionsFromDOM(); state.questions.splice(idx, 1); renderQuestionsEditor(); }));
-      row.appendChild(top);
-
-      const optLabel = document.createElement("span");
-      optLabel.className = "field-label";
-      optLabel.textContent = "Options à proposer sous forme numérotée (séparées par des virgules, laisser vide si question ouverte)";
-      const optInput = document.createElement("input");
-      optInput.type = "text";
-      optInput.className = "q-options";
-      optInput.value = (q.options || []).join(", ");
-      row.appendChild(optLabel);
-      row.appendChild(optInput);
-
-      wrap.appendChild(row);
-    });
+  function linesOf(sel) {
+    return $(sel).value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
   }
 
   function syncPlatformsFromDOM() {
     state.platforms = $$(".prow").map(function (row) {
       return {
         id: row.dataset.id,
-        name: $(".p-name", row).value,
+        name: $(".p-name", row).value.trim(),
         tone: $(".p-tone", row).value,
         emoji: $(".p-emoji", row).value,
         hashtags: $(".p-hashtags", row).value
       };
-    });
+    }).filter(function (p) { return p.name; });
   }
   function renderPlatformsEditor() {
     const wrap = $("#platformsEditor");
@@ -677,15 +1125,16 @@ Notre collaborateur nous a présenté un simple dessin… et une seule mesure ! 
       top.className = "prow-top";
       const nameInput = document.createElement("input");
       nameInput.type = "text"; nameInput.className = "p-name"; nameInput.value = p.name;
+      nameInput.setAttribute("aria-label", "Nom de la plateforme");
       top.appendChild(nameInput);
-      top.appendChild(mkIconBtn("↑", idx === 0, function () { syncPlatformsFromDOM(); moveItem(state.platforms, idx, -1); renderPlatformsEditor(); }));
-      top.appendChild(mkIconBtn("↓", idx === state.platforms.length - 1, function () { syncPlatformsFromDOM(); moveItem(state.platforms, idx, 1); renderPlatformsEditor(); }));
-      top.appendChild(mkIconBtn("✕", false, function () { syncPlatformsFromDOM(); state.platforms.splice(idx, 1); renderPlatformsEditor(); }));
+      top.appendChild(mkIconBtn("\u2191", idx === 0, function () { syncPlatformsFromDOM(); moveItem(state.platforms, idx, -1); renderPlatformsEditor(); }));
+      top.appendChild(mkIconBtn("\u2193", idx === state.platforms.length - 1, function () { syncPlatformsFromDOM(); moveItem(state.platforms, idx, 1); renderPlatformsEditor(); }));
+      top.appendChild(mkIconBtn("\u2715", false, function () { syncPlatformsFromDOM(); state.platforms.splice(idx, 1); renderPlatformsEditor(); }));
       row.appendChild(top);
 
       const toneLabel = document.createElement("span"); toneLabel.className = "field-label"; toneLabel.textContent = "Ton";
       const toneInput = document.createElement("textarea"); toneInput.className = "p-tone"; toneInput.value = p.tone || "";
-      const emojiLabel = document.createElement("span"); emojiLabel.className = "field-label"; emojiLabel.textContent = "Émojis";
+      const emojiLabel = document.createElement("span"); emojiLabel.className = "field-label"; emojiLabel.textContent = "\u00c9mojis";
       const emojiInput = document.createElement("input"); emojiInput.type = "text"; emojiInput.className = "p-emoji"; emojiInput.value = p.emoji || "";
       const hashLabel = document.createElement("span"); hashLabel.className = "field-label"; hashLabel.textContent = "Mots-clics";
       const hashInput = document.createElement("input"); hashInput.type = "text"; hashInput.className = "p-hashtags"; hashInput.value = p.hashtags || "";
@@ -696,7 +1145,6 @@ Notre collaborateur nous a présenté un simple dessin… et une seule mesure ! 
       wrap.appendChild(row);
     });
   }
-
   function mkIconBtn(symbol, disabled, onClick) {
     const b = document.createElement("button");
     b.className = "icon-btn-sm";
@@ -714,8 +1162,15 @@ Notre collaborateur nous a présenté un simple dessin… et une seule mesure ! 
 
   // ---------- Events ----------
 
-  sendBtn.addEventListener("click", sendMessage);
-  resetBtn.addEventListener("click", resetChat);
+  $("#startBtn").addEventListener("click", function () {
+    if (history.length && !confirm("Relancer efface la discussion en cours. Continuer ?")) return;
+    startConversation();
+  });
+  $("#editParamsBtn").addEventListener("click", function () { showForm(true); });
+  $("#cancelEditBtn").addEventListener("click", function () { showSummary(); });
+
+  sendBtn.addEventListener("click", function () { sendMessage(); });
+  $("#resetBtn").addEventListener("click", function () { resetAll(false); });
   input.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
@@ -729,33 +1184,30 @@ Notre collaborateur nous a présenté un simple dessin… et une seule mesure ! 
   });
   $("#saveKeyBtn").addEventListener("click", function () {
     const val = apiKeyInput.value.trim();
-    if (val) { localStorage.setItem(LS.apiKey, val); }
+    if (val) { try { localStorage.setItem(LS.apiKey, val); } catch (e) { /* rien */ } }
     apiKeyInput.value = "";
     apiKeyInput.type = "password";
     refreshKeyStatus();
-    resetChat();
+    if (!history.length) showEmpty();
+    formError.textContent = "";
   });
 
   $("#settingsBtn").addEventListener("click", openSettings);
   $("#closeSettingsBtn").addEventListener("click", closeSettings);
   $("#restoreDefaultsBtn").addEventListener("click", function () {
-    if (!confirm("Remplacer tous les réglages par les réglages d'origine ?")) return;
+    if (!confirm("Remplacer tous les r\u00e9glages par les r\u00e9glages d'origine ?")) return;
     state = {
       systemPrompt: DEFAULT_SYSTEM_PROMPT,
       examples: DEFAULT_EXAMPLES,
-      questions: JSON.parse(JSON.stringify(DEFAULT_QUESTIONS)),
-      platforms: JSON.parse(JSON.stringify(DEFAULT_PLATFORMS))
+      platforms: clone(DEFAULT_PLATFORMS),
+      lists: clone(DEFAULT_LISTS)
     };
     save(LS.systemPrompt, state.systemPrompt);
     save(LS.examples, state.examples);
-    save(LS.questions, state.questions);
     save(LS.platforms, state.platforms);
+    save(LS.lists, state.lists);
+    renderForm();
     openSettings();
-  });
-  $("#addQuestionBtn").addEventListener("click", function () {
-    syncQuestionsFromDOM();
-    state.questions.push({ id: uid(), label: "Nouvelle question", options: [] });
-    renderQuestionsEditor();
   });
   $("#addPlatformBtn").addEventListener("click", function () {
     syncPlatformsFromDOM();
@@ -765,18 +1217,28 @@ Notre collaborateur nous a présenté un simple dessin… et une seule mesure ! 
   $("#saveSettingsBtn").addEventListener("click", function () {
     state.systemPrompt = $("#systemPromptInput").value;
     state.examples = $("#examplesInput").value;
-    save(LS.examples, state.examples);
-    syncQuestionsFromDOM();
+    state.lists = {
+      research: linesOf("#listResearch"),
+      tones: linesOf("#listTones"),
+      types: linesOf("#listTypes"),
+      markets: linesOf("#listMarkets")
+    };
     syncPlatformsFromDOM();
     save(LS.systemPrompt, state.systemPrompt);
-    save(LS.questions, state.questions);
+    save(LS.examples, state.examples);
+    save(LS.lists, state.lists);
     save(LS.platforms, state.platforms);
-    closeSettings();
-    addSystemNote("Paramètres mis à jour. Clique sur \u00ab Nouveau contenu \u00bb pour repartir avec les nouveaux réglages.");
+    params.research = params.research.filter(function (r) { return state.lists.research.indexOf(r) >= 0; });
+    if (state.lists.tones.indexOf(params.tone) < 0) params.tone = "";
+    if (state.lists.types.indexOf(params.type) < 0) params.type = "";
+    if (state.lists.markets.indexOf(params.market) < 0) params.market = "";
+    renderForm();
+    $("#settingsModal").hidden = true;
+    if (history.length) addSystemNote("Param\u00e8tres enregistr\u00e9s. Ils s'appliquent d\u00e8s ton prochain message.");
   });
 
   refreshKeyStatus();
-  resetChat();
+  resetAll(true);
 })();
 </script>
 
